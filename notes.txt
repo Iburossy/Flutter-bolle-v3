@@ -1,2 +1,0 @@
-Je rappel que les "variables inutilisées seront par la suite utilisées,
-donc je sais pas si tu doit les supprimer, car on en aura besoin apres

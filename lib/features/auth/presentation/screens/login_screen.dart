@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF6E3), // Couleur de fond beige clair
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255), // Couleur de fond blanc
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -119,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: screenHeight * 0.03),
                 Text(
-                  'Welcome Back',
+                  'Bienvenue Citoyen',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 32.0,
@@ -234,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16.0),
                 CustomAuthTextField(
                   controller: _passwordController,
-                  hintText: 'Password',
+                  hintText: 'Mot de passe',
                   prefixIcon: Icons.lock_outline_rounded,
                   obscureText: true,
                   validator: (value) {
@@ -255,14 +255,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       print('Forgot password pressed');
                     },
                     child: Text(
-                      'Forgot password?',
+                      'Mot de passe oublié ?',
                       style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
                     ),
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.02),
                 AuthFormButton(
-                  text: 'Log In',
+                  text: 'Se connecter',
                   onPressed: _loginUser,
                   isLoading: _isLoading,
                   backgroundColor: const Color(0xFF003A70), // Bleu foncé
@@ -271,11 +271,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 Center(
                   child: RichText(
                     text: TextSpan(
-                      text: "Don't have an account? ",
+                      text: "Pas de compte ? ",
                       style: TextStyle(color: Colors.grey.shade700, fontSize: 15),
                       children: <TextSpan>[
                         TextSpan(
-                          text: 'Register',
+                          text: 'S\'inscrire',
                           style: const TextStyle(
                             color: Color(0xFF4CAF50), // Vert
                             fontWeight: FontWeight.bold,

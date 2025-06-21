@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import '../../../../core/services/cloudinary_service.dart';
 import '../../../../core/config/api_config.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -16,6 +17,10 @@ class AlertRepositoryImpl implements AlertRepository {
   final ApiService apiService;
   final NetworkInfo networkInfo;
   final FlutterSecureStorage secureStorage;
+  final CloudinaryService cloudinaryService;
+  
+  // Flag pour désactiver temporairement l'upload pendant le débogage
+  final bool uploadEnabled = true;
 
   // Constants for secure storage keys
   static const String _tokenKey = 'auth_token';
@@ -24,6 +29,7 @@ class AlertRepositoryImpl implements AlertRepository {
     required this.apiService,
     required this.networkInfo,
     required this.secureStorage,
+    required this.cloudinaryService,
   });
 
   @override
@@ -58,19 +64,70 @@ class AlertRepositoryImpl implements AlertRepository {
       print('DEBUG - Endpoint: ${ApiConfig.createAlertEndpoint}');
       print('DEBUG - Full URL: ${ApiConfig.getFullUrl(ApiConfig.createAlertEndpoint)}');
 
+      // Vérifier s'il y a des preuves à télécharger
+      print('DEBUG - Checking for proofs to upload');
+      List<Map<String, dynamic>> proofs = [];
+      
+      if (payload.containsKey('proofs') && payload['proofs'] is List && (payload['proofs'] as List).isNotEmpty) {
+        print('DEBUG - Found ${(payload['proofs'] as List).length} proofs to upload');
+        
+        // Télécharger chaque fichier de preuve
+        for (var proof in payload['proofs']) {
+          try {
+            if (proof['url'] != null && proof['type'] != null) {
+              // Chemin local du fichier
+              final String localPath = proof['url'];
+              final String proofType = proof['type'];
+              
+              print('DEBUG - Uploading file: $localPath of type: $proofType');
+              
+              // Télécharger le fichier avec Cloudinary
+              final uploadResult = uploadEnabled 
+                  ? await cloudinaryService.uploadFile(localPath, proofType)
+                  : null;
+              
+              if (uploadResult != null) {
+                // Ajouter les informations du fichier téléchargé à la liste des preuves
+                // S'assurer que url est une chaîne de caractères et non un objet
+                proofs.add({
+                  'type': proofType,
+                  'url': uploadResult['url'], // Déjà une chaîne de caractères
+                  'size': uploadResult['size'] ?? proof['size'] ?? 0,
+                });
+                print('DEBUG - File uploaded successfully: ${uploadResult['url']}');
+              } else {
+                print('DEBUG - Failed to upload file: $localPath');
+              }
+            }
+          } catch (e) {
+            print('DEBUG - Error uploading file: $e');
+          }
+        }
+      } else {
+        print('DEBUG - No proofs to upload');
+      }
+      
       // Utiliser l'endpoint défini dans ApiConfig
       print('DEBUG - Sending POST request');
       try {
         print('DEBUG - About to send HTTP request to: ${ApiConfig.getFullUrl(ApiConfig.createAlertEndpoint)}');
         
-        // Essayer avec une requête simplifiée sans les preuves pour tester
-        var simplifiedPayload = Map<String, dynamic>.from(payload);
-        simplifiedPayload.remove('proofs'); // Retirer les preuves pour tester
+        // Préparer le payload final avec les preuves téléchargées (s'il y en a)
+        var finalPayload = Map<String, dynamic>.from(payload);
         
-        print('DEBUG - Sending simplified request without proofs first');
+        if (proofs.isNotEmpty) {
+          finalPayload['proofs'] = proofs;
+          print('DEBUG - Including ${proofs.length} uploaded proofs in request');
+        } else {
+          // Si aucune preuve n'a été téléchargée avec succès, supprimer le champ proofs
+          finalPayload.remove('proofs');
+          print('DEBUG - No proofs included in request');
+        }
+        
+        print('DEBUG - Sending request with final payload');
         final response = await apiService.post(
           ApiConfig.createAlertEndpoint,
-          body: simplifiedPayload,
+          body: finalPayload,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -92,9 +149,16 @@ class AlertRepositoryImpl implements AlertRepository {
           var uri = Uri.parse(ApiConfig.getFullUrl(ApiConfig.createAlertEndpoint));
           print('DEBUG - Sending direct HTTP request to $uri');
           
-          // Utiliser le même payload simplifié que précédemment
-          var simplifiedPayload = Map<String, dynamic>.from(payload);
-          simplifiedPayload.remove('proofs');
+          // Utiliser le même traitement des preuves que dans la requête principale
+          var directPayload = Map<String, dynamic>.from(payload);
+          
+          if (proofs.isNotEmpty) {
+            directPayload['proofs'] = proofs;
+            print('DEBUG - Including ${proofs.length} uploaded proofs in direct request');
+          } else {
+            directPayload.remove('proofs');
+            print('DEBUG - No proofs included in direct request');
+          }
           
           var directResponse = await client.post(
             uri,
@@ -102,7 +166,7 @@ class AlertRepositoryImpl implements AlertRepository {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $token',
             },
-            body: json.encode(simplifiedPayload),
+            body: json.encode(directPayload),
           ).timeout(Duration(seconds: 30));
           
           print('DEBUG - Direct HTTP response status: ${directResponse.statusCode}');
@@ -205,4 +269,6 @@ class AlertRepositoryImpl implements AlertRepository {
       return Left(NetworkFailure(message: 'No internet connection'));
     }
   }
+  
+  // La méthode _uploadFile a été remplacée par CloudinaryService.uploadFile
 }

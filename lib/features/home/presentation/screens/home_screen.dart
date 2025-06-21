@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../services/data/models/available_service_model.dart';
 import '../../../services/data/providers/available_services_provider.dart';
 import '../../../services/presentation/screens/service_detail_screen.dart';
+import '../../../home/widgets/location_map_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -180,30 +182,8 @@ class HomeTabScreen extends StatelessWidget {
             ),
           ),
           
-          // Bouton "Lancer alerte"
+          // Espace en bas
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              onPressed: () => onNavigateToTab(2), // Naviguer vers l'onglet des services
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF006837),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
-                ),
-              ),
-              child: const Text(
-                'Lancer alerte',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
         ],
       ),
     );
@@ -271,13 +251,314 @@ class HomeTabScreen extends StatelessWidget {
   }
 }
 
-class AlertsTabScreen extends StatelessWidget {
+class AlertsTabScreen extends StatefulWidget {
   const AlertsTabScreen({super.key});
 
   @override
+  State<AlertsTabScreen> createState() => _AlertsTabScreenState();
+}
+
+class _AlertsTabScreenState extends State<AlertsTabScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  String _selectedCategory = 'Déchets';
+  String _selectedPriority = 'medium';
+  bool _isAnonymous = false;
+  bool _isSubmitting = false;
+  
+  // Localisation
+  Position? _currentPosition;
+  String _currentAddress = '';
+  
+  // Liste des preuves (photos, vidéos, etc.)
+  final List<Map<String, dynamic>> _proofs = [];
+  
+  // Catégories d'alertes disponibles
+  final List<String> _categories = [
+    'Déchets',
+    'Eau',
+    'Électricité',
+    'Voirie',
+    'Sécurité',
+    'Autre'
+  ];
+  
+  // Niveaux de priorité
+  final Map<String, String> _priorities = {
+    'low': 'Faible',
+    'medium': 'Moyenne',
+    'high': 'Élevée',
+    'critical': 'Critique'
+  };
+  
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+  
+  // Méthode pour mettre à jour la position et l'adresse
+  void _updateLocation(Position position, String address) {
+    setState(() {
+      _currentPosition = position;
+      _currentAddress = address;
+    });
+  }
+  
+  // Méthode pour ajouter une preuve (photo, vidéo, etc.)
+  Future<void> _addProof() async {
+    // Cette méthode serait implémentée pour utiliser image_picker
+    // et uploader les fichiers vers Cloudinary
+    // Pour l'instant, affichons simplement une boîte de dialogue
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Ajouter une preuve'),
+        content: const Text('Cette fonctionnalité utiliserait image_picker pour prendre des photos ou vidéos, puis les enverrait à Cloudinary.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Méthode pour soumettre l'alerte
+  Future<void> _submitAlert() async {
+    if (_formKey.currentState!.validate() && _currentPosition != null) {
+      setState(() => _isSubmitting = true);
+      
+      try {
+        // Ici, nous utiliserions le bloc pour soumettre l'alerte
+        // avec toutes les informations, y compris la localisation
+        
+        // Simuler un délai pour l'exemple
+        await Future.delayed(const Duration(seconds: 2));
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Alerte envoyée avec succès!')),
+          );
+          
+          // Réinitialiser le formulaire
+          _formKey.currentState!.reset();
+          _titleController.clear();
+          _descriptionController.clear();
+          setState(() {
+            _proofs.clear();
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erreur: ${e.toString()}')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isSubmitting = false);
+        }
+      }
+    } else if (_currentPosition == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez sélectionner une localisation')),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Page des alertes à implémenter'),
+    return Scaffold(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Signaler un problème',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              
+              // Titre de l'alerte
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Titre',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer un titre';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              
+              // Description de l'alerte (optionnelle)
+              TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description (optionnelle)',
+                  hintText: 'Ajoutez des détails sur l\'alerte si nécessaire',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+                // Pas de validation requise car le champ est optionnel
+              ),
+              const SizedBox(height: 16),
+              
+              // Catégorie
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                decoration: const InputDecoration(
+                  labelText: 'Catégorie',
+                  border: OutlineInputBorder(),
+                ),
+                items: _categories.map((category) {
+                  return DropdownMenuItem(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedCategory = value;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              
+              // Priorité
+              DropdownButtonFormField<String>(
+                value: _selectedPriority,
+                decoration: const InputDecoration(
+                  labelText: 'Priorité',
+                  border: OutlineInputBorder(),
+                ),
+                items: _priorities.entries.map((entry) {
+                  return DropdownMenuItem(
+                    value: entry.key,
+                    child: Text(entry.value),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedPriority = value;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              
+              // Localisation avec Google Maps
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Localisation',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  if (_currentAddress.isNotEmpty)
+                    Flexible(
+                      child: Text(
+                        _currentAddress,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LocationMapWidget(
+                    height: 250,
+                    onLocationSelected: _updateLocation,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Preuves (photos, vidéos, etc.)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Preuves',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: _addProof,
+                    icon: const Icon(Icons.add_a_photo),
+                    label: const Text('Ajouter'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (_proofs.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Center(
+                    child: Text('Aucune preuve ajoutée'),
+                  ),
+                )
+              else
+                Container(
+                  // Ici, on afficherait la liste des preuves
+                ),
+              const SizedBox(height: 16),
+              
+              // Option pour rester anonyme
+              CheckboxListTile(
+                title: const Text('Rester anonyme'),
+                value: _isAnonymous,
+                onChanged: (value) {
+                  setState(() {
+                    _isAnonymous = value ?? false;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: 24),
+              
+              // Bouton de soumission
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isSubmitting ? null : _submitAlert,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: _isSubmitting
+                      ? const CircularProgressIndicator()
+                      : const Text('Envoyer l\'alerte'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

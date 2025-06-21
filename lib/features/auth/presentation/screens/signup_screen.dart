@@ -120,7 +120,7 @@ class _SignupScreenState extends State<SignupScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF6E3), // Couleur de fond beige clair
+      backgroundColor: const Color.fromARGB(255, 249, 249, 249), // Couleur de fond blanc
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),

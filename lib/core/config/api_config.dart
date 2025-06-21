@@ -23,6 +23,11 @@ class ApiConfig {
   static const String alertsEndpoint = '/auth/alerts';
   static const String createAlertEndpoint = '/auth/alerts';
   
+  /// Endpoints d'upload de fichiers
+  static const String uploadFileEndpoint = '/auth/alerts/upload';
+  static const String uploadMultipleFilesEndpoint = '/auth/alerts/uploads';
+  static const String deleteFileEndpoint = '/auth/alerts/upload';
+  
   /// Construit l'URL complète pour un endpoint donné
   static String getFullUrl(String endpoint) {
     return '$baseUrl$apiPrefix$endpoint';

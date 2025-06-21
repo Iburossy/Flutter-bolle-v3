@@ -14,6 +14,7 @@ class AlertModel extends Equatable {
   final String userId;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final Map<String, dynamic>? assignedStation;
 
   const AlertModel({
     required this.id,
@@ -28,6 +29,7 @@ class AlertModel extends Equatable {
     required this.userId,
     required this.createdAt,
     required this.updatedAt,
+    this.assignedStation,
   });
 
   /// Creates an AlertModel from a JSON map
@@ -51,6 +53,7 @@ class AlertModel extends Equatable {
       updatedAt: json['updatedAt'] != null 
           ? DateTime.parse(json['updatedAt']) 
           : DateTime.now(),
+      assignedStation: json['assignedStation'] is Map<String, dynamic> ? json['assignedStation'] as Map<String, dynamic> : null,
     );
   }
 
@@ -77,6 +80,10 @@ class AlertModel extends Equatable {
     if (images != null) {
       data['images'] = images;
     }
+    
+    if (assignedStation != null) {
+      data['assignedStation'] = assignedStation;
+    }
 
     return data;
   }
@@ -89,6 +96,7 @@ class AlertModel extends Equatable {
     description, 
     isAnonymous, 
     priority, 
+    assignedStation, 
     status, 
     location, 
     images, 

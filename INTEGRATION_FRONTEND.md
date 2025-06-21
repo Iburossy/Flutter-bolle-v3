@@ -12,13 +12,13 @@ Ce document explique comment intégrer le backend `citizen-service` avec l'appli
 
 ## Configuration du backend
 
-### Prérequis
+ Prérequis
 
 - Node.js (v14 ou supérieur)
 - MongoDB (v4.4 ou supérieur)
 - npm ou yarn
 
-### Installation et démarrage
+ Installation et démarrage
 
 1. Assurez-vous que MongoDB est en cours d'exécution
 2. Configurez les variables d'environnement dans le fichier `.env` :
@@ -37,11 +37,11 @@ Ce document explique comment intégrer le backend `citizen-service` avec l'appli
    npm run dev
    ```
 
-4. Le serveur devrait maintenant être accessible à l'adresse `http://localhost:3001`
+4. Le serveur est accessible à l'adresse `http://localhost:3001`
 
 ## Configuration du frontend
 
-### Mise à jour des points d'API
+ Mise à jour des points d'API
 
 Dans votre application Flutter, vous devez mettre à jour les points d'API pour qu'ils pointent vers le nouveau backend `citizen-service`.
 
@@ -75,7 +75,7 @@ class ApiConstants {
 
 > **Note** : `10.0.2.2` est l'adresse spéciale qui permet à l'émulateur Android d'accéder à l'hôte local (localhost) de votre machine.
 
-### Configuration des modèles de données
+ Configuration des modèles de données
 
 Assurez-vous que vos modèles de données dans Flutter correspondent aux modèles utilisés par le backend `citizen-service`.
 
@@ -83,7 +83,7 @@ Assurez-vous que vos modèles de données dans Flutter correspondent aux modèle
 
 Le backend `citizen-service` prend en charge l'authentification flexible avec email ou numéro de téléphone. Voici comment l'intégrer :
 
-### Inscription
+ Inscription
 
 ```dart
 Future<void> register({
@@ -124,7 +124,7 @@ Future<void> register({
 }
 ```
 
-### Connexion
+ Connexion
 
 ```dart
 Future<void> login({
@@ -161,7 +161,7 @@ Future<void> login({
 }
 ```
 
-### Stockage du token JWT
+ Stockage du token JWT
 
 ```dart
 Future<void> _saveToken(String token) async {
@@ -175,7 +175,7 @@ Future<String?> getToken() async {
 }
 ```
 
-### Ajout d'un intercepteur HTTP pour les requêtes authentifiées
+ Ajout d'un intercepteur HTTP pour les requêtes authentifiées
 
 ```dart
 class AuthInterceptor extends Interceptor {
@@ -199,7 +199,7 @@ dio.interceptors.add(AuthInterceptor());
 
 ## Gestion des alertes
 
-### Création d'une alerte
+ Création d'une alerte
 
 ```dart
 Future<void> createAlert({
@@ -232,7 +232,7 @@ Future<void> createAlert({
 }
 ```
 
-### Récupération des alertes
+ Récupération des alertes
 
 ```dart
 Future<List<dynamic>> getMyAlerts() async {
@@ -248,7 +248,7 @@ Future<List<dynamic>> getMyAlerts() async {
 }
 ```
 
-### Récupération des alertes à proximité
+ Récupération des alertes à proximité
 
 ```dart
 Future<List<dynamic>> getAlertsNearby({
@@ -275,7 +275,7 @@ Future<List<dynamic>> getAlertsNearby({
 
 ## Dépannage
 
-### Problèmes de connexion au backend
+ Problèmes de connexion au backend
 
 1. **Vérifiez que le serveur backend est en cours d'exécution**
    ```bash
@@ -297,7 +297,7 @@ Future<List<dynamic>> getAlertsNearby({
    </manifest>
    ```
 
-### Problèmes d'authentification
+ Problèmes d'authentification
 
 1. **Vérifiez que vous envoyez les bonnes informations d'identification**
    - Email ou numéro de téléphone
@@ -308,7 +308,7 @@ Future<List<dynamic>> getAlertsNearby({
 
 3. **Vérifiez les logs du serveur pour plus de détails sur les erreurs**
 
-### Problèmes de création d'alertes
+ Problèmes de création d'alertes
 
 1. **Vérifiez que vous êtes bien authentifié**
    - Le token JWT doit être valide et inclus dans les en-têtes de la requête

@@ -12,7 +12,8 @@ class AvailableServicesProvider {
       AvailableServiceModel(
         id: 'police-service',
         name: 'Police nationale',
-        description: 'Signaler des incidents, déposer une plainte ou demander une assistance',
+        description:
+            'Signaler des incidents, déposer une plainte ou demander une assistance',
         iconPath: 'assets/icons/police.png',
         color: '#006837', // Vert foncé
         categories: [
@@ -20,33 +21,35 @@ class AvailableServicesProvider {
           'Agression',
           'Disparition',
           'Accident',
-          'Nuisance sonore'
+          'Nuisance sonore',
         ],
         isActive: true,
       ),
-      
+
       // Service d'hygiène
       AvailableServiceModel(
         id: '68356f4666e7c7fb7fc3ab3f', // ID réel du service d'hygiène dans MongoDB
         name: 'Service d\'hygiène',
-        description: 'Signaler des problèmes liés à l\'hygiène, la salubrité publique et l\'environnement',
+        description:
+            'Signaler des problèmes liés à l\'hygiène, la salubrité publique et l\'environnement',
         iconPath: 'assets/icons/hygiene.png',
-        color: '#FFD700', // Jaune
+        color: '#FFC107', // Jaune
         categories: [
           'solutions', // Correspond aux catégories définies dans MongoDB
           'déchets',
           'eau',
           'nuisibles',
-          'autres'
+          'autres',
         ],
         isActive: true,
       ),
-      
+
       // Douanes
       AvailableServiceModel(
         id: 'customs-service',
         name: 'Douanes',
-        description: 'Signaler des activités de contrebande ou des marchandises illégales',
+        description:
+            'Signaler des activités de contrebande ou des marchandises illégales',
         iconPath: 'assets/icons/customs.png',
         color: '#D73B28', // Rouge-orange
         categories: [
@@ -57,12 +60,13 @@ class AvailableServicesProvider {
         ],
         isActive: true,
       ),
-      
+
       // Gendarmerie
       AvailableServiceModel(
         id: 'gendarmerie-service',
         name: 'Gendarmerie',
-        description: 'Signaler des incidents en zone rurale ou sur les grands axes routiers',
+        description:
+            'Signaler des incidents en zone rurale ou sur les grands axes routiers',
         iconPath: 'assets/icons/gendarmerie.png',
         color: '#004A2F', // Vert foncé
         categories: [

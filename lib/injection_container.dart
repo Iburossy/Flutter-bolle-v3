@@ -23,6 +23,8 @@ import 'features/alerts/presentation/bloc/create_alert_bloc.dart';
 import 'core/network/api_service.dart';
 import 'core/network/network_info.dart';
 import 'core/services/file_upload_service.dart';
+import 'core/services/cloudinary_service.dart';
+import 'core/services/location_service.dart';
 
 // Service Locator
 final sl = GetIt.instance;
@@ -68,6 +70,7 @@ Future<void> init() async {
       apiService: sl(),
       networkInfo: sl(),
       secureStorage: sl(),
+      cloudinaryService: sl(),
     ),
   );
 
@@ -75,8 +78,19 @@ Future<void> init() async {
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());
   sl.registerLazySingleton(() => ApiService(client: sl()));
   sl.registerLazySingleton(() => FileUploadService(
-    apiService: sl(),
+    cloudinaryService: sl(),
     secureStorage: sl(),
+  ));
+  
+  // Service Cloudinary
+  sl.registerLazySingleton(() => CloudinaryService(
+    cloudName: 'dpqayer6b', // Corrigé: nom du cloud correct
+    uploadPreset: 'bolleMedia', // Corrigé: preset d'upload correct
+  ));
+  
+  // Service de localisation Google Maps
+  sl.registerLazySingleton(() => LocationService(
+    apiKey: 'AIzaSyCAmPMShcxxhCDSpSv3lD5Ioq98sDqeyYY',
   ));
 
   //! External

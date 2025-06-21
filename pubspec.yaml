@@ -49,9 +49,13 @@ dependencies:
   dartz: ^0.10.1
   equatable: ^2.0.5
   
+  # File Upload
+  
   # Location and Maps
   geolocator: ^11.0.0
   geocoding: ^2.1.1
+  google_maps_flutter: ^2.5.3
+  google_maps_flutter_web: ^0.5.8
   
   # Dependency Injection
   get_it: ^7.6.78
@@ -60,6 +64,7 @@ dependencies:
   file_picker: ^10.1.9
   path_provider: ^2.1.5
   permission_handler: ^12.0.0+1
+  cloudinary_public: ^0.23.1
 
 dev_dependencies:
   flutter_test:
