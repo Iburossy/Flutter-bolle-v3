@@ -49,13 +49,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Vérifier si nous sommes dans un onglet de navigation ou dans une page empilée
+    final bool canPop = Navigator.of(context).canPop();
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profil'),
-        leading: IconButton(
+        // N'afficher le bouton de retour que si nous pouvons revenir en arrière
+        // (c'est-à-dire si l'écran a été ouvert via une navigation push et non comme onglet)
+        automaticallyImplyLeading: canPop,
+        leading: canPop ? IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
-        ),
+        ) : null,
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),

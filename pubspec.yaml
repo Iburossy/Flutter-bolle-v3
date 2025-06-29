@@ -43,7 +43,7 @@ dependencies:
   shared_preferences: ^2.2.2
   
   # Environment Variables
-  flutter_dotenv: ^5.1.0
+  flutter_dotenv: ^5.2.1
   
   # Functional Programming
   dartz: ^0.10.1
@@ -67,6 +67,7 @@ dependencies:
   cloudinary_public: ^0.23.1
   url_launcher: ^6.3.1
   url_launcher_platform_interface: ^2.3.2
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -95,6 +96,9 @@ flutter:
   assets:
     - assets/images/
     - .env
+    - .env.dev
+    - .env.test
+    - .env.prod
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

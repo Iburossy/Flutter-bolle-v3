@@ -32,10 +32,11 @@ class CreateAlertBloc extends Bloc<CreateAlertEvent, CreateAlertState> {
       if (event.imagePaths != null && event.imagePaths!.isNotEmpty) {
         for (final imagePath in event.imagePaths!) {
           final imageFile = File(imagePath);
-          final imageUrl = await fileUploadService.uploadImage(imageFile);
+          // Utiliser la méthode qui retourne directement une chaîne
+          final imageUrl = await fileUploadService.uploadImageAndGetUrl(imageFile);
           proofs.add({
             'type': 'photo',
-            'url': imageUrl,
+            'url': imageUrl, // Maintenant c'est une chaîne simple
             'size': imageFile.lengthSync(),
           });
         }
@@ -44,10 +45,11 @@ class CreateAlertBloc extends Bloc<CreateAlertEvent, CreateAlertState> {
       // Upload de la vidéo si présente
       if (event.videoPath != null) {
         final videoFile = File(event.videoPath!);
-        final videoUrl = await fileUploadService.uploadVideo(videoFile);
+        // Utiliser la méthode qui retourne directement une chaîne
+        final videoUrl = await fileUploadService.uploadVideoAndGetUrl(videoFile);
         proofs.add({
           'type': 'video',
-          'url': videoUrl,
+          'url': videoUrl, // Maintenant c'est une chaîne simple
           'size': videoFile.lengthSync(),
         });
       }
@@ -55,10 +57,11 @@ class CreateAlertBloc extends Bloc<CreateAlertEvent, CreateAlertState> {
       // Upload de l'audio si présent
       if (event.audioPath != null) {
         final audioFile = File(event.audioPath!);
-        final audioUrl = await fileUploadService.uploadAudio(audioFile);
+        // Utiliser la méthode qui retourne directement une chaîne
+        final audioUrl = await fileUploadService.uploadAudioAndGetUrl(audioFile);
         proofs.add({
           'type': 'audio',
-          'url': audioUrl,
+          'url': audioUrl, // Maintenant c'est une chaîne simple
           'size': audioFile.lengthSync(),
         });
       }

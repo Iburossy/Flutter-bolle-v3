@@ -1,10 +1,12 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// Configuration des endpoints API
 class ApiConfig {
   /// URL de base de l'API
-  static const String baseUrl = 'http://10.0.2.2:3001';
+  static String get baseUrl => dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:3001';
   
   /// Préfixe de l'API
-  static const String apiPrefix = '/api';
+  static String get apiPrefix => dotenv.env['API_PREFIX'] ?? '/api';
   
   /// Endpoints d'authentification
   static const String loginEndpoint = '/auth/login';

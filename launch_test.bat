@@ -1,0 +1,3 @@
+@echo off
+echo Lancement de l'application en environnement de test...
+flutter run --dart-define=ENV=test

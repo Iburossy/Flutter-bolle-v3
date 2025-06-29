@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import '../../../history/presentation/screens/alert_history_screen.dart';
 
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
@@ -65,6 +66,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const ServiceDirectoryScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history, color: Color(0xFF006837)),
+              title: const Text('Historique des alertes'),
+              onTap: () {
+                Navigator.pop(context); // Ferme le drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AlertHistoryScreen(),
                   ),
                 );
               },

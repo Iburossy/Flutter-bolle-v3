@@ -1,0 +1,3 @@
+@echo off
+echo Lancement de l'application en environnement de production...
+flutter run --dart-define=ENV=production
