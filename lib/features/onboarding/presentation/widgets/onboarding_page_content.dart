@@ -8,35 +8,64 @@ class OnboardingPageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          // Placeholder for image - assuming images are in assets/images/
-          // You'll need to add your images to the assets folder and pubspec.yaml
-          Image.asset(
-            item.imagePath,
-            height: MediaQuery.of(context).size.height * 0.4,
-            fit: BoxFit.contain,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Image plein écran
+        Image.asset(
+          item.imagePath,
+          fit: BoxFit.cover,
+        ),
+
+        // Dégradé pour améliorer lisibilité du texte
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.center,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Colors.black.withValues(alpha: 0.7),
+              ],
+            ),
           ),
-          const SizedBox(height: 48.0),
-          Text(
-            item.title,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+        ),
+
+        // Texte positionné plus haut
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 32, right: 32, bottom: 120), // ↑ Ici on remonte le texte
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: Column(
+                key: ValueKey(item.title),
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    item.title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    item.description,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 16.0),
-          Text(
-            item.description,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -85,7 +85,19 @@ class _VerificationScreenState extends State<VerificationScreen> {
         requestBody['phone'] = '000000000'; 
       } else {
         // Pour une inscription par téléphone, 'widget.contactInfo' contient le vrai numéro.
-        requestBody['phone'] = widget.contactInfo;
+        // Ajouter le préfixe international +221 s'il n'est pas déjà présent
+        String phoneNumber = widget.contactInfo;
+        if (!phoneNumber.startsWith('+221')) {
+          // Supprimer tout préfixe existant (221 ou 00221) avant d'ajouter +221
+          if (phoneNumber.startsWith('221')) {
+            phoneNumber = phoneNumber.substring(3);
+          } else if (phoneNumber.startsWith('00221')) {
+            phoneNumber = phoneNumber.substring(5);
+          }
+          // Ajouter le préfixe +221
+          phoneNumber = '+221' + phoneNumber;
+        }
+        requestBody['phone'] = phoneNumber;
       }
 
       final response = await _apiService.post(

@@ -88,13 +88,50 @@ class AlertRepositoryImpl implements AlertRepository {
               
               if (uploadResult != null) {
                 // Ajouter les informations du fichier téléchargé à la liste des preuves
-                // S'assurer que url est une chaîne de caractères et non un objet
+                // S'assurer que url est toujours une chaîne de caractères et non un objet
+                // Initialiser avec une valeur par défaut pour éviter les erreurs
+                String urlString = uploadResult['url']?.toString() ?? '';
+                
+                // Vérifier si l'URL est un objet ou une chaîne
+                if (uploadResult['url'] is String) {
+                  // Déjà une chaîne, utiliser directement
+                  urlString = uploadResult['url'];
+                  print('DEBUG - URL is already a string: $urlString');
+                } else if (uploadResult['url'] is Map) {
+                  // Si c'est un Map, essayer d'extraire l'URL comme chaîne
+                  // Vérifier d'abord la clé 'secure_url' qui est la clé standard de Cloudinary
+                  if (uploadResult['url']['secure_url'] != null) {
+                    urlString = uploadResult['url']['secure_url'];
+                  } else if (uploadResult['url']['url'] != null) {
+                    urlString = uploadResult['url']['url'];
+                  } else {
+                    // Si aucune clé standard n'est trouvée, utiliser la première valeur de type String
+                    var foundString = false;
+                    uploadResult['url'].forEach((key, value) {
+                      if (value is String && !foundString) {
+                        urlString = value;
+                        foundString = true;
+                      }
+                    });
+                    
+                    // Si aucune valeur String n'est trouvée, convertir tout l'objet en String
+                    if (!foundString) {
+                      urlString = uploadResult['url'].toString();
+                    }
+                  }
+                  print('DEBUG - Converted URL object to string: $urlString');
+                } else {
+                  // Fallback au cas où
+                  urlString = uploadResult['url'].toString();
+                  print('DEBUG - Converted URL (unknown type) to string: $urlString');
+                }
+                
                 proofs.add({
                   'type': proofType,
-                  'url': uploadResult['url'], // Déjà une chaîne de caractères
+                  'url': urlString, // Maintenant c'est garanti d'être une chaîne
                   'size': uploadResult['size'] ?? proof['size'] ?? 0,
                 });
-                print('DEBUG - File uploaded successfully: ${uploadResult['url']}');
+                print('DEBUG - File uploaded successfully: $urlString');
               } else {
                 print('DEBUG - Failed to upload file: $localPath');
               }

@@ -21,12 +21,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final _phoneNumberController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
-  
+
   // Track which login method is selected (email or phone)
   bool _useEmailLogin = false;
 
   // image login
-  final String _headerImagePath = 'assets/images/login_header.png';
+  final String _headerImagePath = 'assets/images/login.png';
 
   @override
   void dispose() {
@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _loginUser() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      
+
       // Create login request model based on selected method
       final LoginRequestModel loginRequest;
       if (_useEmailLogin) {
@@ -53,21 +53,21 @@ class _LoginScreenState extends State<LoginScreen> {
           password: _passwordController.text,
         );
       }
-      
+
       // Get the use case from the service locator
       final loginUseCase = sl<LoginUserUseCase>();
-      
+
       // Execute the use case
       final result = await loginUseCase(loginRequest);
-      
+
       // Handle the result
       result.fold(
         (failure) {
           // Handle failure
           setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur: ${failure.message}')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Erreur: ${failure.message}')));
         },
         (authResponse) {
           // Handle success
@@ -93,7 +93,12 @@ class _LoginScreenState extends State<LoginScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255), // Couleur de fond blanc
+      backgroundColor: const Color.fromARGB(
+        255,
+        255,
+        255,
+        255,
+      ), // Couleur de fond blanc
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -104,18 +109,24 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 SizedBox(height: screenHeight * 0.05),
-                // Header Image (Placeholder - replace with your actual image)
-                // Image.asset(
-                //   _headerImagePath, 
-                //   height: screenHeight * 0.25, 
-                //   fit: BoxFit.contain,
-                // ),
-                // Temporary placeholder for the header image section
+                // Header Image
                 Container(
                   height: screenHeight * 0.25,
                   alignment: Alignment.center,
-                  child: const Icon(Icons.security_rounded, size: 80, color: Color(0xFF003A70)), // Placeholder icon
-                  // child: Image.asset(_headerImagePath, fit: BoxFit.contain), // Use this once you have the image
+                  child: Image.asset(
+                    _headerImagePath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      print(
+                        'Erreur de chargement de l\'image: $_headerImagePath',
+                      );
+                      return const Icon(
+                        Icons.security_rounded,
+                        size: 80,
+                        color: Color(0xFF003A70),
+                      );
+                    },
+                  ),
                 ),
                 SizedBox(height: screenHeight * 0.03),
                 Text(
@@ -128,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.04),
-                
+
                 // Toggle between email and phone number login
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -143,13 +154,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: !_useEmailLogin ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Colors.transparent,
+                            color:
+                                !_useEmailLogin
+                                    ? Theme.of(
+                                      context,
+                                    ).primaryColor.withValues(alpha: 0.1)
+                                    : Colors.transparent,
                             borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(8),
                               bottomLeft: Radius.circular(8),
                             ),
                             border: Border.all(
-                              color: !_useEmailLogin ? Theme.of(context).primaryColor : Colors.grey.shade300,
+                              color:
+                                  !_useEmailLogin
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey.shade300,
                               width: 1,
                             ),
                           ),
@@ -157,8 +176,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             'Téléphone',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: !_useEmailLogin ? Theme.of(context).primaryColor : Colors.grey.shade700,
-                              fontWeight: !_useEmailLogin ? FontWeight.bold : FontWeight.normal,
+                              color:
+                                  !_useEmailLogin
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey.shade700,
+                              fontWeight:
+                                  !_useEmailLogin
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                             ),
                           ),
                         ),
@@ -174,13 +199,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: _useEmailLogin ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Colors.transparent,
+                            color:
+                                _useEmailLogin
+                                    ? Theme.of(
+                                      context,
+                                    ).primaryColor.withValues(alpha: 0.1)
+                                    : Colors.transparent,
                             borderRadius: const BorderRadius.only(
                               topRight: Radius.circular(8),
                               bottomRight: Radius.circular(8),
                             ),
                             border: Border.all(
-                              color: _useEmailLogin ? Theme.of(context).primaryColor : Colors.grey.shade300,
+                              color:
+                                  _useEmailLogin
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey.shade300,
                               width: 1,
                             ),
                           ),
@@ -188,8 +221,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             'Email',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: _useEmailLogin ? Theme.of(context).primaryColor : Colors.grey.shade700,
-                              fontWeight: _useEmailLogin ? FontWeight.bold : FontWeight.normal,
+                              color:
+                                  _useEmailLogin
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey.shade700,
+                              fontWeight:
+                                  _useEmailLogin
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                             ),
                           ),
                         ),
@@ -197,12 +236,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16.0),
-                
+
                 // Show either email or phone number field based on selection
                 _useEmailLogin
-                  ? CustomAuthTextField(
+                    ? CustomAuthTextField(
                       controller: _emailController,
                       hintText: 'Email',
                       prefixIcon: Icons.email_outlined,
@@ -212,13 +251,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           return 'Veuillez entrer votre adresse email';
                         }
                         // Basic email validation
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(value)) {
                           return 'Veuillez entrer une adresse email valide';
                         }
                         return null;
                       },
                     )
-                  : CustomAuthTextField(
+                    : CustomAuthTextField(
                       controller: _phoneNumberController,
                       hintText: 'Numéro de téléphone',
                       prefixIcon: Icons.phone_outlined,
@@ -256,7 +297,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: Text(
                       'Mot de passe oublié ?',
-                      style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+                      style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ),
@@ -272,7 +316,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: RichText(
                     text: TextSpan(
                       text: "Pas de compte ? ",
-                      style: TextStyle(color: Colors.grey.shade700, fontSize: 15),
+                      style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontSize: 15,
+                      ),
                       children: <TextSpan>[
                         TextSpan(
                           text: 'S\'inscrire',
@@ -281,13 +328,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
                           ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const SignupScreen()),
-                              );
-                            },
+                          recognizer:
+                              TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => const SignupScreen(),
+                                    ),
+                                  );
+                                },
                         ),
                       ],
                     ),

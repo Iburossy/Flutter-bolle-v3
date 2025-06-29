@@ -14,7 +14,7 @@ class AvailableServicesProvider {
         name: 'Police nationale',
         description:
             'Signaler des incidents, déposer une plainte ou demander une assistance',
-        iconPath: 'assets/icons/police.png',
+        iconPath: 'assets/images/police.jpg',
         color: '#006837', // Vert foncé
         categories: [
           'Vol',
@@ -32,7 +32,7 @@ class AvailableServicesProvider {
         name: 'Service d\'hygiène',
         description:
             'Signaler des problèmes liés à l\'hygiène, la salubrité publique et l\'environnement',
-        iconPath: 'assets/icons/hygiene.png',
+        iconPath: 'assets/images/hygiene.jpg',
         color: '#FFC107', // Jaune
         categories: [
           'solutions', // Correspond aux catégories définies dans MongoDB
@@ -47,10 +47,10 @@ class AvailableServicesProvider {
       // Douanes
       AvailableServiceModel(
         id: 'customs-service',
-        name: 'Douanes',
+        name: 'Douane',
         description:
             'Signaler des activités de contrebande ou des marchandises illégales',
-        iconPath: 'assets/icons/customs.png',
+        iconPath: 'assets/images/douane.jpg',
         color: '#D73B28', // Rouge-orange
         categories: [
           'Contrebande',
@@ -67,7 +67,7 @@ class AvailableServicesProvider {
         name: 'Gendarmerie',
         description:
             'Signaler des incidents en zone rurale ou sur les grands axes routiers',
-        iconPath: 'assets/icons/gendarmerie.png',
+        iconPath: 'assets/images/gendarmerie.jpg',
         color: '#004A2F', // Vert foncé
         categories: [
           'Sécurité routière',
@@ -75,6 +75,42 @@ class AvailableServicesProvider {
           'Contrefaçon',
           'Environnement',
         ],
+        isActive: true,
+      ),
+
+      // UCG
+      AvailableServiceModel(
+        id: 'ucg-service',
+        name: 'UCG',
+        description:
+            'Signaler des problèmes liés à la gestion des déchets et à la salubrité publique',
+        iconPath: 'assets/images/ucg.png',
+        color: '#004A2F',
+        categories: [
+          'Déchets ménagers',
+          'Dépôts sauvages',
+          'Hygiène publique',
+          'Nettoyage des voies',
+        ],
+
+        isActive: true,
+      ),
+
+      // ONAS
+      AvailableServiceModel(
+        id: 'onas-service',
+        name: 'ONAS',
+        description:
+            'Signaler des problèmes liés à l\'assainissement, aux eaux usées ou aux canalisations bouchées',
+        iconPath: 'assets/images/onas.jpg',
+        color: '#0066CC', // Bleu ONAS
+        categories: [
+          'Canalisations bouchées',
+          'Débordement eaux usées',
+          'Assainissement non fonctionnel',
+          'Odeurs nauséabondes',
+        ],
+
         isActive: true,
       ),
     ];

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import '../../../home/widgets/location_map_widget.dart';
 
 import '../../../../injection_container.dart' as di;
 import '../../../alerts/data/models/create_alert_request_model.dart';
@@ -294,7 +295,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
   
-  // Obtenir la localisation actuelle
+  // Cette méthode n'est plus nécessaire car la localisation est gérée par le widget LocationMapWidget
+  // Nous la gardons comme méthode de secours au cas où
   Future<void> _getCurrentLocation() async {
     try {
       // Vérification de la disponibilité des services de localisation
@@ -340,7 +342,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       });
       
       try {
-        // Obtenir l'adresse à partir des coordonnées
+        // Obtenir l'adresse à partir des coordonnées avec un format plus complet
         List<Placemark> placemarks = await placemarkFromCoordinates(
           position.latitude,
           position.longitude
@@ -349,7 +351,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         if (placemarks.isNotEmpty) {
           Placemark place = placemarks[0];
           setState(() {
-            _currentAddress = '${place.street ?? ''}, ${place.locality ?? ''}${place.administrativeArea != null ? ', ${place.administrativeArea}' : ''}';
+            // Format d'adresse plus complet
+            _currentAddress = '${place.street ?? ''}, ${place.locality ?? ''}, ${place.postalCode ?? ''}, ${place.country ?? ''}';
           });
         }
       } catch (geocodeError) {
@@ -427,13 +430,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       
       // Créer l'objet de requête d'alerte au format attendu par le backend
       final alertRequest = CreateAlertRequestModel(
+        // L'ID du service est déjà l'ID MongoDB (_id) récupéré du backend
+        // Le constructeur AvailableServiceModel.fromJson assigne json['_id'] à la propriété id
         serviceId: widget.service.id,
         category: _selectedCategory!.toLowerCase(), // Assurez-vous que la catégorie est en minuscules pour correspondre au backend
         description: _descriptionController.text,
         coordinates: _currentCoordinates,
         address: _currentAddress,
         isAnonymous: _isAnonymous,
-        proofs: _processProofs(),
+        proofs: _processProofs(), priority: '', title: '',
       );
 
       print('DEBUG - Alert request created: ${alertRequest.toJson()}');
@@ -603,36 +608,56 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
   
-  // Carte de localisation
+  // Carte de localisation avec widget de carte interactive
   Widget _buildLocationCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.location_on, color: Colors.red, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Utilisation automatique',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  'de la géolocalisation',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
-      ),
+          child: Row(
+            children: [
+              const Icon(Icons.location_on, color: Colors.red, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Utilisation automatique',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    ),
+                    Text(
+                      'de la géolocalisation',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Ajouter le widget de carte interactif
+        LocationMapWidget(
+          height: 200,
+          showControls: true,
+          onLocationSelected: (Position position, String address) {
+            setState(() {
+              // Mettre à jour les coordonnées [longitude, latitude] (format demandé par le backend)
+              _currentCoordinates = [position.longitude, position.latitude];
+              _currentAddress = address;
+            });
+            print('DEBUG - Position sélectionnée: ${position.latitude}, ${position.longitude}');
+            print('DEBUG - Adresse: $address');
+          },
+        ),
+      ],
     );
   }
 

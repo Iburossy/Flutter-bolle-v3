@@ -194,7 +194,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         title: 'Alerte ${widget.service.name}', // Générer un titre automatiquement
         description: _descriptionController.text,
         isAnonymous: _isAnonymous,
-        priority: 'medium', // Valeur par défaut pour la priorité
+        priority: 'medium', serviceId: '', coordinates: [], address: '', // Valeur par défaut pour la priorité
       );
 
       // Utiliser le BLoC pour envoyer l'alerte avec les fichiers sélectionnés

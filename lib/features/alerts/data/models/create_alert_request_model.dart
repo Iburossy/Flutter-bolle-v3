@@ -18,7 +18,7 @@ class CreateAlertRequestModel extends Equatable {
     required this.coordinates,
     required this.address,
     required this.isAnonymous,
-    this.proofs,
+    this.proofs, required String priority, required String title,
   });
 
   /// Converts this CreateAlertRequestModel to a JSON map
@@ -59,7 +59,7 @@ class CreateAlertRequestModel extends Equatable {
       coordinates: coordinates ?? this.coordinates,
       address: address ?? this.address,
       isAnonymous: isAnonymous ?? this.isAnonymous,
-      proofs: proofs ?? this.proofs,
+      proofs: proofs ?? this.proofs, priority: '', title: '',
     );
   }
 

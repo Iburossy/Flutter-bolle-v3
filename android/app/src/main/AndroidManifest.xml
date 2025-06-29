@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permissions pour les appels téléphoniques -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
     <application
         android:label="citoyen"
         android:name="${applicationName}"
@@ -45,6 +47,15 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Support pour les appels téléphoniques -->
+        <intent>
+            <action android:name="android.intent.action.DIAL" />
+            <data android:scheme="tel" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="tel" />
         </intent>
     </queries>
     <!-- Permissions pour l'accès aux médias -->

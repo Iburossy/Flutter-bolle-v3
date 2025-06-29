@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+
 import '../../data/models/available_service_model.dart';
 import '../../../../features/alerts/data/models/create_alert_request_model.dart';
 import '../../../../features/alerts/presentation/bloc/create_alert_bloc.dart';
@@ -50,7 +51,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: serviceColor.withOpacity(0.2),
+        color: serviceColor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Image.asset(
@@ -193,7 +194,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         title: 'Alerte ${widget.service.name}', // Générer un titre automatiquement
         description: _descriptionController.text,
         isAnonymous: _isAnonymous,
-        priority: 'medium', // Valeur par défaut pour la priorité
+        priority: 'medium', serviceId: '', coordinates: [], address: '', // Valeur par défaut pour la priorité
       );
 
       // Utiliser le BLoC pour envoyer l'alerte avec les fichiers sélectionnés
