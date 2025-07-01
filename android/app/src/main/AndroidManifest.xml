@@ -2,7 +2,7 @@
     <!-- Permissions pour les appels téléphoniques -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <application
-        android:label="citoyen"
+        android:label="Yollë"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -1,5 +1,6 @@
 // Fichier : home_screen.dart
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import '../../../history/presentation/screens/alert_history_screen.dart';
@@ -50,15 +51,20 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF006837)),
-              child: Text(
+            // En-tête du drawer avec hauteur personnalisée pour s'aligner avec l'AppBar
+            Container(
+              height: 70 + MediaQuery.of(context).padding.top, // Même hauteur que l'AppBar + padding du système
+              width: double.infinity,
+              color: AppColors.appBarColor, // Utiliser la même couleur que l'AppBar
+              padding: EdgeInsets.only(top: 30, left: 16),
+              alignment: Alignment.centerLeft,
+              child: const Text(
                 'Menu',
                 style: TextStyle(color: Colors.white, fontSize: 24),
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.phone, color: Color(0xFF006837)),
+              leading: const Icon(Icons.phone, color: Color.fromARGB(255, 53, 126, 120)),
               title: const Text('Numero de service'),
               onTap: () {
                 Navigator.pop(context); // Ferme le drawer
@@ -71,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.history, color: Color(0xFF006837)),
+              leading: const Icon(Icons.history, color: Color.fromARGB(255, 53, 126, 120)),
               title: const Text('Historique des alertes'),
               onTap: () {
                 Navigator.pop(context); // Ferme le drawer
@@ -84,11 +90,11 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             const ListTile(
-              leading: Icon(Icons.settings),
+              leading: Icon(Icons.settings, color: Color.fromARGB(255, 53, 126, 120)),
               title: Text('Paramètres'),
             ),
             ListTile(
-              leading: const Icon(Icons.info, color: Color(0xFF006837)),
+              leading: const Icon(Icons.info, color: Color.fromARGB(255, 53, 126, 120)),
               title: const Text('À propos'),
               onTap: () {
                 Navigator.pop(context); // Ferme le drawer
@@ -149,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: Container(
-          color: const Color(0xFF006837),
+          color: AppColors.appBarColor, // Utilisation de la couleur du thème centralisé
           padding: const EdgeInsets.only(top: 30, left: 16, right: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

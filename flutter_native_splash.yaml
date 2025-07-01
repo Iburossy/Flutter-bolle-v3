@@ -1,0 +1,33 @@
+flutter_native_splash:
+  # Couleur de fond de l'écran de démarrage
+  color: "#FFFFFF"
+  # Vous pouvez également utiliser une image de fond au lieu d'une couleur
+  # background_image: "assets/background.png"
+  
+  # Chemin vers l'image du logo
+  image: assets/images/logo.png
+  
+  # Ajuster la taille de l'image (optionnel)
+  # Par défaut, l'image occupe 60% de l'écran
+  # Vous pouvez ajuster cette valeur entre 0 et 1
+  # image_size: 0.5
+  
+  # Position de l'image (optionnel)
+  # Par défaut, l'image est centrée
+  # Vous pouvez spécifier une position personnalisée
+  # position: center
+  
+  # Couleur de la barre d'état (Android uniquement)
+  android_12:
+    # La couleur de la barre d'état et de la barre de navigation pour Android 12+
+    color: "#FFFFFF"
+    # Chemin vers l'icône qui sera utilisée pour Android 12+
+    image: assets/images/logo.png
+    # Vous pouvez également spécifier une couleur d'icône
+    # icon_background_color: "#111111"
+  
+  # Configuration pour iOS
+  ios: true
+  
+  # Configuration pour le web
+  web: false

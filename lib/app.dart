@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart'; // Import OnboardingScreen
+import 'features/splash/presentation/screens/splash_screen.dart'; // Import SplashScreen
+import 'core/theme/app_theme.dart'; // Import du thème personnalisé
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -7,18 +9,10 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Citoyen App',
+      title: 'Yollë',
       debugShowCheckedModeBanner: false, // Optionnel: pour cacher la bannière de debug
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        // Vous pouvez personnaliser davantage votre thème ici
-        // Par exemple, pour correspondre aux couleurs de vos maquettes:
-        // colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFYOUR_PRIMARY_COLOR_HEX)),
-        // textTheme: Theme.of(context).textTheme.apply(
-        //   fontFamily: 'VotrePoliceCustom', // Si vous en avez une
-        // ),
-      ),
-      home: const OnboardingScreen(), // Définir OnboardingScreen comme page d'accueil
+      theme: AppTheme.getLightTheme(), // Utilisation de notre thème personnalisé
+      home: SplashScreen(nextScreen: const OnboardingScreen()), // Afficher d'abord le SplashScreen, puis OnboardingScreen
     );
   }
 }

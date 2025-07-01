@@ -3,7 +3,16 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// Configuration des endpoints API
 class ApiConfig {
   /// URL de base de l'API
-  static String get baseUrl => dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:3001';
+  static String get baseUrl {
+    // Utiliser l'URL définie dans le fichier .env s'il existe
+    if (dotenv.env['API_BASE_URL'] != null) {
+      return dotenv.env['API_BASE_URL']!;
+    }
+    
+    // Par défaut, utiliser 10.0.2.2 pour l'émulateur Android
+    // Cette adresse spéciale permet à l'émulateur d'accéder au localhost de l'ordinateur hôte
+    return 'http://10.0.2.2:3001';
+  }
   
   /// Préfixe de l'API
   static String get apiPrefix => dotenv.env['API_PREFIX'] ?? '/api';

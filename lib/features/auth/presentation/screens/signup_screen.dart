@@ -318,7 +318,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   text: 'Créer un compte',
                   onPressed: _signupUser,
                   isLoading: _isLoading,
-                  backgroundColor: const Color(0xFF357E78), // Vert sarcelle
+                  backgroundColor: const Color.fromARGB(255, 53, 126, 120), // Vert sarcelle
                   textColor: Colors.white,
                 ),
                 SizedBox(height: screenHeight * 0.02),

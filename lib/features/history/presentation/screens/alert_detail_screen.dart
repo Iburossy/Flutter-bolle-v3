@@ -53,7 +53,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Détails de l\'alerte'),
-        backgroundColor: const Color(0xFF006837),
+        backgroundColor: const Color.fromARGB(255, 53, 126, 120),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -406,7 +406,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.location_on, color: Color(0xFF006837)),
+                    const Icon(Icons.location_on, color: Color.fromARGB(255, 53, 126, 120)),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -420,7 +420,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                 ElevatedButton.icon(
                   onPressed: _openLocationOnMap,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF006837),
+                    backgroundColor: const Color.fromARGB(255, 53, 126, 120),
                     foregroundColor: Colors.white,
                   ),
                   icon: const Icon(Icons.map),

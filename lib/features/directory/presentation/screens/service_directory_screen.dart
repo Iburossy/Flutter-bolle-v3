@@ -140,46 +140,69 @@ class _ServiceDirectoryScreenState extends State<ServiceDirectoryScreen> with Si
     }
   }
 
-  // Widget pour afficher un contact de service
+  // Widget pour afficher un contact de service en format carte pour la grille
   Widget _buildContactCard(ServiceContactModel contact) {
     return Card(
       elevation: 3,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: const Color(0xFF006837).withOpacity(0.2),
-          child: Icon(
-            _getIconData(contact.iconName),
-            color: const Color(0xFF006837),
-          ),
-        ),
-        title: Text(
-          contact.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      margin: const EdgeInsets.all(8),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Icône du service en haut
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: const Color.fromARGB(255, 53, 126, 120),
+              child: Icon(
+                _getIconData(contact.iconName),
+                color: const Color.fromARGB(255, 255, 255, 255),
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Nom du service
+            Text(
+              contact.name,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: 4),
-            Text(contact.phoneNumber),
-            const SizedBox(height: 2),
+            // Numéro de téléphone
+            Text(
+              contact.phoneNumber,
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            // Description courte
             Text(
               contact.description,
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 10),
+            // Bouton d'appel
+            ElevatedButton(
+              onPressed: () => _makePhoneCall(contact.phoneNumber),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 53, 126, 120),
+                foregroundColor: Colors.white,
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(12),
+              ),
+              child: const Icon(Icons.call),
             ),
           ],
         ),
-        trailing: ElevatedButton(
-          onPressed: () => _makePhoneCall(contact.phoneNumber),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF006837),
-            foregroundColor: Colors.white,
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(12),
-          ),
-          child: const Icon(Icons.call),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
     );
   }
@@ -237,7 +260,14 @@ class _ServiceDirectoryScreenState extends State<ServiceDirectoryScreen> with Si
             controller: _tabController,
             children: _categories.map((category) {
               final contacts = _directoryService.getContactsByCategory(category);
-              return ListView.builder(
+              return GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.75,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                ),
+                padding: const EdgeInsets.all(8),
                 itemCount: contacts.length,
                 itemBuilder: (context, index) => _buildContactCard(contacts[index]),
               );
@@ -268,7 +298,14 @@ class _ServiceDirectoryScreenState extends State<ServiceDirectoryScreen> with Si
       );
     }
     
-    return ListView.builder(
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.75,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      padding: const EdgeInsets.all(8),
       itemCount: _filteredContacts.length,
       itemBuilder: (context, index) => _buildContactCard(_filteredContacts[index]),
     );

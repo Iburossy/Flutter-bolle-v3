@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import '../../../home/widgets/location_map_widget.dart';
 
 import '../../../../injection_container.dart' as di;
 import '../../../alerts/data/models/create_alert_request_model.dart';
@@ -245,7 +244,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       children: [
         Expanded(
           child: RadioListTile<bool>(
-            title: const Text('Anonyme'),
+            title: const Text('Oui'),
             value: true,
             groupValue: _isAnonymous,
             onChanged: (bool? value) {
@@ -257,7 +256,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         ),
         Expanded(
           child: RadioListTile<bool>(
-            title: const Text('Non anonyme'),
+            title: const Text('Non'),
             value: false,
             groupValue: _isAnonymous,
             onChanged: (bool? value) {
@@ -608,7 +607,88 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
   
-  // Carte de localisation avec widget de carte interactive
+  // Récupération de la position actuelle sans carte
+  Future<void> _getLocation() async {
+    try {
+      // Vérifier les permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Permission de localisation refusée')),
+          );
+          return;
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Les permissions de localisation sont refusées de façon permanente, nous ne pouvons pas demander les permissions.'),
+          ),
+        );
+        return;
+      }
+      
+      // Afficher un indicateur de chargement
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Récupération de votre position...')),
+      );
+      
+      // Obtenir la position
+      final Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      
+      // Géocodage inverse pour obtenir l'adresse
+      String address = "Adresse inconnue";
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        
+        if (placemarks.isNotEmpty) {
+          Placemark place = placemarks[0];
+          address = '${place.street ?? ''}, ${place.locality ?? ''}, ${place.postalCode ?? ''}, ${place.country ?? ''}';
+        }
+      } catch (e) {
+        print('Erreur de géocodage: $e');
+      }
+      
+      // Mettre à jour les coordonnées et l'adresse
+      setState(() {
+        _currentCoordinates = [position.longitude, position.latitude];
+        _currentAddress = address;
+      });
+      
+      // Afficher un message de succès
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Position récupérée avec succès')),
+      );
+      
+      print('DEBUG - Position récupérée: ${position.latitude}, ${position.longitude}');
+      print('DEBUG - Adresse: $address');
+      
+    } catch (e) {
+      // Gérer les erreurs
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur de localisation: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      
+      // Définir des coordonnées par défaut pour Dakar
+      setState(() {
+        _currentCoordinates = [-17.4440, 14.6937]; // Dakar, Sénégal
+        _currentAddress = "Dakar, Sénégal";
+      });
+    }
+  }
+
+  // Carte de localisation sans affichage de carte (pour éviter les plantages)
   Widget _buildLocationCard() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -620,42 +700,37 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             border: Border.all(color: Colors.grey.shade300),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Row(
-            children: [
-              const Icon(Icons.location_on, color: Colors.red, size: 24),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'Utilisation automatique',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
-                    Text(
-                      'de la géolocalisation',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ],
+          child: InkWell(
+            onTap: _getLocation, // Récupérer la position au clic
+            child: Row(
+              children: [
+                const Icon(Icons.location_on, color: Colors.red, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Utilisation automatique',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      const Text(
+                        'de la géolocalisation',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      // Afficher l'adresse actuelle si disponible
+                      Text(
+                        _currentAddress.isNotEmpty ? _currentAddress : 'Appuyez pour localiser',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                Icon(Icons.refresh, color: Colors.blue[700]),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        // Ajouter le widget de carte interactif
-        LocationMapWidget(
-          height: 200,
-          showControls: true,
-          onLocationSelected: (Position position, String address) {
-            setState(() {
-              // Mettre à jour les coordonnées [longitude, latitude] (format demandé par le backend)
-              _currentCoordinates = [position.longitude, position.latitude];
-              _currentAddress = address;
-            });
-            print('DEBUG - Position sélectionnée: ${position.latitude}, ${position.longitude}');
-            print('DEBUG - Adresse: $address');
-          },
         ),
       ],
     );

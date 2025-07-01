@@ -75,41 +75,54 @@ class AlertRepositoryImpl implements AlertRepository {
         for (var proof in payload['proofs']) {
           try {
             if (proof['url'] != null && proof['type'] != null) {
-              // Chemin local du fichier
-              final String localPath = proof['url'];
+              final String urlOrPath = proof['url'];
               final String proofType = proof['type'];
               
-              print('DEBUG - Uploading file: $localPath of type: $proofType');
+              // Vérifier si l'URL est déjà une URL Cloudinary
+              bool isAlreadyCloudinaryUrl = urlOrPath.startsWith('https://res.cloudinary.com/');
               
-              // Télécharger le fichier avec Cloudinary
-              final uploadResult = uploadEnabled 
-                  ? await cloudinaryService.uploadFile(localPath, proofType)
-                  : null;
-              
-              if (uploadResult != null) {
-                // Extraire l'URL comme une chaîne simple
-                // CloudinaryService retourne déjà une chaîne dans response.secureUrl
-                String urlString;
-                
-                // Simplifier la logique pour garantir que nous avons toujours une chaîne
-                if (uploadResult['url'] is String) {
-                  // Si c'est déjà une chaîne, l'utiliser directement
-                  urlString = uploadResult['url'];
-                  print('DEBUG - URL is already a string: $urlString');
-                } else {
-                  // Dans tous les autres cas, convertir en chaîne
-                  urlString = uploadResult['url'].toString();
-                  print('DEBUG - Converted URL to string: $urlString');
-                }
+              if (isAlreadyCloudinaryUrl) {
+                // Si c'est déjà une URL Cloudinary, l'utiliser directement
+                print('DEBUG - URL is already a Cloudinary URL, using it directly: $urlOrPath');
                 
                 proofs.add({
                   'type': proofType,
-                  'url': urlString, // Maintenant c'est garanti d'être une chaîne
-                  'size': uploadResult['size'] ?? proof['size'] ?? 0,
+                  'url': urlOrPath, // Utiliser directement l'URL Cloudinary
+                  'size': proof['size'] ?? 0,
                 });
-                print('DEBUG - File uploaded successfully: $urlString');
+                
+                print('DEBUG - Added existing Cloudinary URL to proofs: $urlOrPath');
               } else {
-                print('DEBUG - Failed to upload file: $localPath');
+                // Sinon, téléverser le fichier local
+                print('DEBUG - Uploading local file: $urlOrPath of type: $proofType');
+                
+                // Télécharger le fichier avec Cloudinary
+                final uploadResult = uploadEnabled 
+                    ? await cloudinaryService.uploadFile(urlOrPath, proofType)
+                    : null;
+                
+                if (uploadResult != null) {
+                  // Extraire l'URL comme une chaîne simple
+                  String urlString;
+                  
+                  // Simplifier la logique pour garantir que nous avons toujours une chaîne
+                  if (uploadResult['url'] is String) {
+                    urlString = uploadResult['url'];
+                    print('DEBUG - Upload successful, URL is: $urlString');
+                  } else {
+                    urlString = uploadResult['url'].toString();
+                    print('DEBUG - Upload successful, converted URL to string: $urlString');
+                  }
+                  
+                  proofs.add({
+                    'type': proofType,
+                    'url': urlString,
+                    'size': uploadResult['size'] ?? proof['size'] ?? 0,
+                  });
+                  print('DEBUG - File uploaded successfully to: $urlString');
+                } else {
+                  print('DEBUG - Failed to upload file: $urlOrPath');
+                }
               }
             }
           } catch (e) {

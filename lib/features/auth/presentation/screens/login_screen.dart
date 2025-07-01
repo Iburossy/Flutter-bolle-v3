@@ -309,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   text: 'Se connecter',
                   onPressed: _loginUser,
                   isLoading: _isLoading,
-                  backgroundColor: const Color(0xFF003A70), // Bleu foncé
+                  backgroundColor: const Color.fromARGB(255, 53, 126, 120), // Bleu foncé
                 ),
                 SizedBox(height: screenHeight * 0.03),
                 Center(
@@ -324,7 +324,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextSpan(
                           text: 'S\'inscrire',
                           style: const TextStyle(
-                            color: Color(0xFF4CAF50), // Vert
+                            color: Color.fromARGB(255, 53, 126, 120), // Vert
                             fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
                           ),

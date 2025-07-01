@@ -48,7 +48,7 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Historique des alertes'),
-        backgroundColor: const Color(0xFF006837),
+        backgroundColor: const Color.fromARGB(255, 53, 126, 120),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
