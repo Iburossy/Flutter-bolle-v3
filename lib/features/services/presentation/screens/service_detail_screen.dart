@@ -765,10 +765,36 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               );
               Navigator.pop(context);
             } else if (state is CreateAlertError) {
+              // Gérer de manière plus conviviale les erreurs de validation spécifiques
+              String userFriendlyMessage = state.message;
+              
+              // Vérifier si c'est une erreur de validation des preuves
+              if (state.message.contains('Au moins une preuve') ||
+                  state.message.contains('proof') ||
+                  state.message.toLowerCase().contains('validation') ||
+                  state.message.contains('ServerException')) {
+                userFriendlyMessage = 'Veuillez ajouter au moins une preuve (photo, vidéo ou audio) avant de soumettre votre alerte.';
+              }
+              
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Erreur: ${state.message}'),
+                  content: Text(userFriendlyMessage),
                   backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 5),
+                  action: _selectedImagePaths.isEmpty && _selectedVideoPath == null && _selectedAudioPath == null
+                    ? SnackBarAction(
+                        label: 'Ajouter',
+                        textColor: Colors.white,
+                        onPressed: () {
+                          // Scroll vers la section des preuves
+                          Scrollable.ensureVisible(
+                            context,
+                            duration: const Duration(milliseconds: 500),
+                            alignment: 0.5,
+                          );
+                        },
+                      )
+                    : null,
                 ),
               );
             }
