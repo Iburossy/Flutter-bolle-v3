@@ -29,14 +29,14 @@ class HomeTabScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(21, 96, 38, 1),
+                color: Color.fromARGB(255, 53, 126, 120),
               ),
             ),
           ),
           const Text(
-            'Qui voulez-vous envoyer une alerter',
+            'Qui voulez-vous envoyer une alerter ?',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 0, 0, 0)),
           ),
           const SizedBox(height: 24),
           Expanded(

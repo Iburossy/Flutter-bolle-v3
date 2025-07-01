@@ -5,7 +5,7 @@ flutter_native_splash:
   # background_image: "assets/background.png"
   
   # Chemin vers l'image du logo
-  image: assets/images/logo.png
+  image: assets/images/yolle logo.png
   
   # Ajuster la taille de l'image (optionnel)
   # Par défaut, l'image occupe 60% de l'écran
@@ -22,7 +22,7 @@ flutter_native_splash:
     # La couleur de la barre d'état et de la barre de navigation pour Android 12+
     color: "#FFFFFF"
     # Chemin vers l'icône qui sera utilisée pour Android 12+
-    image: assets/images/logo.png
+    image: assets/images/yolle logo.png
     # Vous pouvez également spécifier une couleur d'icône
     # icon_background_color: "#111111"
   

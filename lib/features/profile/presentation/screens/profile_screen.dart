@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import '../../data/models/profile_model.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../widgets/token_debug_widget.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -65,8 +66,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-              // TODO: Naviguer vers l'écran d'édition du profil
+            onPressed: _profile == null ? null : () async {
+              // Naviguer vers l'écran d'édition du profil avec le profil actuel
+              final result = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => EditProfileScreen(profile: _profile!),
+                ),
+              );
+              
+              // Si des modifications ont été effectuées, recharger le profil
+              if (result == true) {
+                _loadUserProfile();
+                
+                // Afficher un message de confirmation
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Profil mis à jour avec succès'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              }
             },
           ),
         ],

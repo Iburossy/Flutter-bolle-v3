@@ -99,10 +99,29 @@ class ProfileRepositoryImpl implements ProfileRepository {
           return Left(AuthFailure(message: 'Utilisateur non authentifié'));
         }
 
+        // Créer un objet avec uniquement les champs autorisés pour la mise à jour
+        final Map<String, dynamic> updateData = {
+          'fullName': profile.fullName,
+          'region': profile.region,
+        };
+        
+        // Ajouter le téléphone uniquement s'il est présent
+        if (profile.phone != null && profile.phone!.isNotEmpty) {
+          updateData['phone'] = profile.phone;
+        }
+        
+        // Ajouter la photo de profil uniquement si elle est présente
+        if (profile.profilePicture != null && profile.profilePicture!.url != null) {
+          // Le backend attend une string pour profilePicture, pas un objet
+          updateData['profilePicture'] = profile.profilePicture!.url;
+        }
+        
+        print('Profile - Données à mettre à jour: $updateData');
+
         // Endpoint pour mettre à jour le profil utilisateur
         final response = await apiService.post(
           ApiConfig.updateProfileEndpoint,
-          body: profile.toJson(),
+          body: updateData,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',

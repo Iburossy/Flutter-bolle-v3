@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             children: [
               // Logo de l'application
               Image.asset(
-                'assets/images/logo.png',
+                'assets/images/yolle logo.png',
                 width: 120,
                 height: 120,
               ),

@@ -8,7 +8,7 @@ class AboutScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('À propos'),
-        backgroundColor: const Color(0xFF006837),
+        backgroundColor: const Color.fromARGB(255, 53, 126, 120),
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -24,7 +24,7 @@ class AboutScreen extends StatelessWidget {
                     height: 120,
                     width: 120,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF006837),
+                      color: const Color.fromARGB(255, 53, 126, 120),
                       borderRadius: BorderRadius.circular(60),
                     ),
                     child: const Center(
@@ -32,7 +32,7 @@ class AboutScreen extends StatelessWidget {
                         'Yollë',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 28,
+                          fontSize: 30,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -43,7 +43,7 @@ class AboutScreen extends StatelessWidget {
                     'Version 1.0.0',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey,
+                      color: Color.fromARGB(255, 0, 0, 0),
                     ),
                   ),
                 ],
@@ -125,7 +125,7 @@ class AboutScreen extends StatelessWidget {
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF006837),
+          color: Color.fromARGB(255, 53, 126, 120),
         ),
       ),
     );
@@ -159,7 +159,7 @@ class AboutScreen extends StatelessWidget {
             ),
             child: Icon(
               icon,
-              color: const Color(0xFF006837),
+              color: const Color.fromARGB(255, 53, 126, 120),
               size: 24,
             ),
           ),
@@ -199,7 +199,7 @@ class AboutScreen extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color: const Color(0xFF006837),
+            color: const Color.fromARGB(255, 53, 126, 120),
             size: 20,
           ),
           const SizedBox(width: 12),

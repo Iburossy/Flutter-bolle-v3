@@ -16,20 +16,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<OnboardingItemModel> _onboardingItems = [
     OnboardingItemModel(
-    imagePath: 'assets/images/img4.png',
-    title: 'Bienvenue sur Yollë',
-    description: 'La plateforme citoyenne pour signaler les injustices, abus et problèmes publics en toute simplicité.',
-
+      imagePath: 'assets/images/img4.png',
+      title: 'Bienvenue sur Yollë',
+      description:
+          'La plateforme citoyenne pour signaler les injustices, abus et problèmes publics en toute simplicité et anonymat.',
     ),
     OnboardingItemModel(
       imagePath: 'assets/images/img6.png',
-      title: 'Signalez un problème',
-      description: 'Lancez une alerte en cas de hausse des prix, de drogues, de pratiques illégales, et plus encore.',
+      title: 'EN CAS DE...',
+      description:
+          'Non respect des prix, un problème dans votre quartier, de pratiques illégales, signalez-le.',
+    ),
+    OnboardingItemModel(
+      imagePath: 'assets/images/gale.png',
+      title: 'Gale gui',
+      description:
+          'Avec Yollë, Signalez en toute discrétion les départs clandestins et sauvez des vies.',
     ),
     OnboardingItemModel(
       imagePath: 'assets/images/img8.png',
       title: 'Un Sénégal meilleur',
-      description: 'Commence par un geste simple. Accédez aux services et lancez des alertes facilement.',
+      description:
+          'Commence par un geste simple. Accédez aux services et lancez des alertes facilement.',
     ),
   ];
 
@@ -46,9 +54,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeIn,
       );
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
     }
   }
 
@@ -83,32 +91,43 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               children: <Widget>[
                 (_currentPage == 0)
                     ? TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (_) => const LoginScreen()),
-                          );
-                        },
-                        child: const Text('Passer', style: TextStyle(color: Colors.grey)),
-                      )
-                    : ElevatedButton(
-                        onPressed: _goToPrevious,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        ),
-                        child: const Text('Précédent'),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Passer',
+                        style: TextStyle(color: Colors.grey),
                       ),
+                    )
+                    : ElevatedButton(
+                      onPressed: _goToPrevious,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: const Text('Précédent'),
+                    ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List<Widget>.generate(_onboardingItems.length, (int index) {
+                  children: List<Widget>.generate(_onboardingItems.length, (
+                    int index,
+                  ) {
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
                       margin: const EdgeInsets.symmetric(horizontal: 4.0),
                       height: 8.0,
                       width: (index == _currentPage) ? 24.0 : 8.0,
                       decoration: BoxDecoration(
-                        color: (index == _currentPage)
-                            ? Theme.of(context).primaryColor
-                            : Colors.grey.shade300,
+                        color:
+                            (index == _currentPage)
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(12),
                       ),
                     );
@@ -117,11 +136,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ElevatedButton(
                   onPressed: _goToNext,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     textStyle: const TextStyle(fontSize: 16),
                   ),
                   child: Text(
-                    _currentPage < _onboardingItems.length - 1 ? 'Suivant' : 'Terminer',
+                    _currentPage < _onboardingItems.length - 1
+                        ? 'Suivant'
+                        : 'Terminer',
                   ),
                 ),
               ],

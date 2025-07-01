@@ -24,7 +24,7 @@ class ServicesTabScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A5632), // Couleur verte pour le thème Yollë
+                  color: Color.fromARGB(255, 53, 126, 120), // Couleur verte pour le thème Yollë
                 ),
               ),
               const SizedBox(height: 12),
@@ -32,7 +32,7 @@ class ServicesTabScreen extends StatelessWidget {
                 'Qui voulez-vous alerter ?',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Color(0xFF757575),
+                  color: Color.fromARGB(255, 0, 0, 0),
                   fontWeight: FontWeight.w400,
                 ),
               ),

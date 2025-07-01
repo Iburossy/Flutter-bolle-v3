@@ -227,7 +227,7 @@ class _ServiceDirectoryScreenState extends State<ServiceDirectoryScreen> with Si
               ),
             )
           : const Text('Annuaire des Services'),
-        backgroundColor: const Color(0xFF006837),
+        backgroundColor: const Color.fromARGB(255, 53, 126, 120),
         foregroundColor: Colors.white,
         actions: [
           // Bouton de recherche

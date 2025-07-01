@@ -21,11 +21,19 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
   bool _isLoading = true;
   AlertHistoryModel? _alert;
   String _errorMessage = '';
+  final TextEditingController _commentController = TextEditingController();
+  bool _isSubmittingComment = false;
 
   @override
   void initState() {
     super.initState();
     _loadAlertDetails();
+  }
+  
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAlertDetails() async {
@@ -45,6 +53,43 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
         _errorMessage = 'Impossible de charger les détails de l\'alerte: ${e.toString()}';
         _isLoading = false;
       });
+    }
+  }
+  
+  // Méthode pour soumettre un commentaire
+  Future<void> _submitComment() async {
+    final comment = _commentController.text.trim();
+    if (comment.isEmpty) return;
+    
+    setState(() {
+      _isSubmittingComment = true;
+    });
+    
+    try {
+      final updatedAlert = await _alertService.addComment(widget.alertId, comment);
+      setState(() {
+        _alert = updatedAlert;
+        _isSubmittingComment = false;
+        _commentController.clear();
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Commentaire ajouté avec succès'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _isSubmittingComment = false;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors de l\'ajout du commentaire: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -497,10 +542,6 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
   }
 
   Widget _buildCommentsSection() {
-    if (_alert!.comments.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -512,51 +553,120 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        Card(
-          elevation: 1,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: _alert!.comments.map((comment) {
-                // Formater la date
-                final commentDate = DateTime.parse(comment['createdAt']);
-                final formatter = DateFormat('dd/MM/yyyy à HH:mm');
-                final formattedDate = formatter.format(commentDate);
-                
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            comment['author'] ?? 'Anonyme',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+        
+        // Afficher les commentaires existants s'il y en a
+        if (_alert!.comments.isNotEmpty)
+          Card(
+            elevation: 1,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: _alert!.comments.map((comment) {
+                  // Formater la date
+                  final commentDate = DateTime.parse(comment['createdAt']);
+                  final formatter = DateFormat('dd/MM/yyyy à HH:mm');
+                  final formattedDate = formatter.format(commentDate);
+                  
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              comment['author'] ?? 'Anonyme',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          Text(
-                            formattedDate,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
+                            Text(
+                              formattedDate,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(comment['text'] ?? ''),
-                      const Divider(),
-                    ],
-                  ),
-                );
-              }).toList(),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(comment['text'] ?? ''),
+                        const Divider(),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ),
-        ),
+          
+        // Afficher le message s'il n'y a pas de commentaires
+        if (_alert!.comments.isEmpty)
+          const Card(
+            elevation: 1,
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Aucun commentaire pour le moment.'),
+            ),
+          ),
+        
+        // Afficher le formulaire d'ajout de commentaire si l'alerte n'est pas résolue
+        if (_alert!.status != 'resolved')
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Card(
+              elevation: 1,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Ajouter un commentaire',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _commentController,
+                      decoration: const InputDecoration(
+                        hintText: 'Votre commentaire...',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isSubmittingComment ? null : _submitComment,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 53, 126, 120),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: _isSubmittingComment
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Envoyer'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
