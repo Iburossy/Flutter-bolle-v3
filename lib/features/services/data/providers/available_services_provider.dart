@@ -113,6 +113,44 @@ class AvailableServicesProvider {
 
         isActive: true,
       ),
+
+      //SANTE
+      AvailableServiceModel(
+      id: 'sante-service',
+      name: 'Santé Publique',
+      description:
+          'Signaler des problèmes liés aux structures de santé, aux urgences non prises en charge ou à la qualité des soins',
+      iconPath: 'assets/images/sante.jpg',
+      color: '#CC0000', // Rouge santé / urgence
+      categories: [
+        'Manque de personnel médical',
+        'Absence de médicaments',
+        'Refus de prise en charge',
+        'Hygiène insuffisante',
+      ],
+      isActive: true,
+),
+
+
+      // SENELEC
+      AvailableServiceModel(
+      id: 'senelec-service',
+      name: 'SENELEC',
+      description:
+          'Signaler des problèmes liés à l’électricité, comme des coupures de courant, des installations dangereuses ou des compteurs défectueux',
+      iconPath: 'assets/images/senelec.jpg',
+      color: '#FFD700', // Jaune doré inspiré de la lumière / énergie
+      categories: [
+        'Coupure de courant',
+        'Facturation anormale',
+        'Compteur défectueux',
+        'Installation électrique dangereuse',
+        'Poteau électrique tombé',
+      ],
+      isActive: true,
+    ),
+
+
     ];
   }
 

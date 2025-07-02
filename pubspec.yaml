@@ -53,9 +53,13 @@ dependencies:
   
   # Location and Maps
   geolocator: ^11.0.0
+  geolocator_android: ^4.5.0
   geocoding: ^2.1.1
   google_maps_flutter: ^2.5.3
   google_maps_flutter_web: ^0.5.8
+  
+  # Audio Recording
+  audio_waveforms: ^1.0.4 # Compatible avec minSdk 21
   
   # Dependency Injection
   get_it: ^7.6.78

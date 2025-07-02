@@ -56,14 +56,14 @@ class ServiceDirectoryService {
         iconName: 'business_center',
         category: 'Administration',
       ),
-      ServiceContactModel(
-        id: 'mairie-dakar',
-        name: 'Mairie de Dakar',
-        phoneNumber: '33 849 09 09',
-        description: 'Hôtel de Ville de Dakar',
-        iconName: 'account_balance',
-        category: 'Administration',
-      ),
+      // ServiceContactModel(
+      //   id: 'mairie-dakar',
+      //   name: 'Mairie de Dakar',
+      //   phoneNumber: '33 849 09 09',
+      //   description: 'Hôtel de Ville de Dakar',
+      //   iconName: 'account_balance',
+      //   category: 'Administration',
+      // ),
       
       // Services de santé
       ServiceContactModel(

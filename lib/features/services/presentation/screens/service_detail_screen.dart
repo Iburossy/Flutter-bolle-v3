@@ -4,6 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:audio_waveforms/audio_waveforms.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../../injection_container.dart' as di;
 import '../../../alerts/data/models/create_alert_request_model.dart';
@@ -44,16 +48,149 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   void initState() {
     super.initState();
     _getCurrentLocation();
+    _initAudio();
+  }
+  
+  // Initialiser les instances audio
+  Future<void> _initAudio() async {
+    try {
+      // Vérifier et demander les permissions nécessaires
+      PermissionStatus microphoneStatus = await Permission.microphone.status;
+      PermissionStatus storageStatus = await Permission.storage.status;
+      
+      if (!microphoneStatus.isGranted) {
+        microphoneStatus = await Permission.microphone.request();
+      }
+      
+      if (!storageStatus.isGranted) {
+        storageStatus = await Permission.storage.request();
+      }
+      
+      // Vérifier si les permissions ont été accordées
+      if (!microphoneStatus.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Permission de microphone refusée. L\'enregistrement audio ne sera pas disponible.'))
+        );
+        return;
+      }
+      
+      // Obtenir le répertoire temporaire pour sauvegarder l'audio
+      final tempDir = await getTemporaryDirectory();
+      final path = '${tempDir.path}/temp_audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      
+      // Initialiser le contrôleur d'enregistrement
+      _audioRecorder = RecorderController()
+        ..androidEncoder = AndroidEncoder.aac
+        ..androidOutputFormat = AndroidOutputFormat.mpeg4
+        ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
+        ..sampleRate = 44100;
+        
+      // Initialiser le contrôleur de lecture
+      _audioPlayer = PlayerController();
+      
+      // Définir le chemin d'enregistrement
+      _recordedPath = path;
+      
+      // Marquer les contrôleurs comme initialisés
+      _isRecorderInitialized = true;
+      _isPlayerInitialized = true;
+      
+      print('Audio initialization successful');
+    } catch (e) {
+      print('Error initializing audio: $e');
+      _isRecorderInitialized = false;
+      _isPlayerInitialized = false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors de l\'initialisation de l\'audio: $e'))
+      );
+    }
   }
   
   @override
   void dispose() {
     _descriptionController.dispose();
+    
+    // Libération des ressources audio
+    if (_isPlayerInitialized) {
+      _audioPlayer.dispose();
+    }
+    if (_isRecorderInitialized) {
+      _audioRecorder.dispose();
+    }
+    
     super.dispose();
   }
   
-  // Sélection d'images
+  // Sélection d'images avec choix entre appareil photo et galerie
   Future<void> _pickImages() async {
+    try {
+      // Afficher une boîte de dialogue pour choisir la source
+      await showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_camera),
+                  title: const Text('Prendre une photo'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await _getImageFromSource(ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Choisir depuis la galerie'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await _getImageFromGallery();
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+      
+      print('Erreur lors de la sélection de photos: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Impossible de sélectionner des photos: $e')),
+      );
+    }
+  }
+  
+  // Sélection d'une image depuis l'appareil photo
+  Future<void> _getImageFromSource(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: source);
+      
+      if (!mounted) return;
+      
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImagePaths.add(pickedFile.path);
+        });
+        // Confirmation visuelle à l'utilisateur
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Photo ajoutée avec succès')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      
+      print('Erreur lors de la prise de photo: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Impossible de prendre une photo: $e')),
+      );
+    }
+  }
+  
+  // Sélection de plusieurs images depuis la galerie
+  Future<void> _getImageFromGallery() async {
     try {
       final picker = ImagePicker();
       final pickedFiles = await picker.pickMultiImage();
@@ -79,11 +216,52 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     }
   }
 
-  // Sélection de vidéo
+  // Sélection de vidéo avec choix entre appareil photo et galerie
   Future<void> _pickVideo() async {
     try {
+      // Afficher une boîte de dialogue pour choisir la source
+      await showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.videocam),
+                  title: const Text('Enregistrer une vidéo'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await _getVideoFromSource(ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.video_library),
+                  title: const Text('Choisir depuis la galerie'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await _getVideoFromSource(ImageSource.gallery);
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+      
+      print('Erreur lors de la sélection de vidéo: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Impossible de sélectionner une vidéo: $e')),
+      );
+    }
+  }
+  
+  // Sélection d'une vidéo depuis une source spécifiée (appareil photo ou galerie)
+  Future<void> _getVideoFromSource(ImageSource source) async {
+    try {
       final picker = ImagePicker();
-      final pickedFile = await picker.pickVideo(source: ImageSource.gallery);
+      final pickedFile = await picker.pickVideo(source: source);
       
       if (!mounted) return;
       
@@ -106,20 +284,95 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     }
   }
 
-  // Sélection d'audio avec méthode simplifiée
+  // Variables pour l'enregistrement audio
+  late final RecorderController _audioRecorder;
+  late final PlayerController _audioPlayer;
+  bool _isRecorderInitialized = false;
+  bool _isPlayerInitialized = false;
+  String _recordedPath = '';
+  String _audioFileName = '';
+
+  // Sélection d'audio avec choix entre enregistrement et galerie
   Future<void> _pickAudio() async {
     try {
-      // Utiliser ImagePicker pour sélectionner un fichier quelconque qui sera traité comme audio
-      // Cette approche évite les problèmes du plugin FilePicker sur certains appareils
-      final picker = ImagePicker();
-      final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+      final result = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Choisir une source audio'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.mic),
+                title: const Text('Enregistrer'),
+                onTap: () => Navigator.pop(context, 'record'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.folder),
+                title: const Text('Galerie'),
+                onTap: () => Navigator.pop(context, 'gallery'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (result == 'record') {
+        await _showAudioRecordingDialog();
+      } else if (result == 'gallery') {
+        await _selectAudioFromGallery();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      
+      print('Erreur lors de la sélection audio: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Impossible de sélectionner un audio: $e')),
+      );
+    }
+  }
+  
+  // Sélection d'un fichier audio depuis la galerie
+  Future<void> _selectAudioFromGallery() async {
+    try {
+      // Vérifier et demander les permissions nécessaires
+      PermissionStatus storageStatus = await Permission.storage.status;
+      
+      if (!storageStatus.isGranted) {
+        storageStatus = await Permission.storage.request();
+      }
+      
+      if (!storageStatus.isGranted) {
+        if (!mounted) return;
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Permission d\'accès au stockage requise pour sélectionner un fichier audio')),
+        );
+        return;
+      }
+
+      // Utiliser FilePicker pour sélectionner un fichier audio
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.audio,
+        allowCompression: true,
+      );
       
       if (!mounted) return;
       
-      if (file != null) {
+      if (result != null && result.files.isNotEmpty) {
         setState(() {
-          _selectedAudioPath = file.path;
+          _selectedAudioPath = result.files.first.path!;
+          _audioFileName = result.files.first.name;
         });
+        
+        // Initialiser le lecteur pour la prévisualisation
+        if (_isPlayerInitialized && _selectedAudioPath != null) {
+          await _audioPlayer.preparePlayer(
+            path: _selectedAudioPath!,
+            shouldExtractWaveform: true,
+          );
+        }
+        
         // Confirmation visuelle à l'utilisateur
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Fichier audio sélectionné avec succès')),
@@ -134,6 +387,155 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       );
     }
   }
+  
+  // Afficher la boîte de dialogue d'enregistrement audio
+  Future<void> _showAudioRecordingDialog() async {
+    if (!await Permission.microphone.isGranted) {
+      await Permission.microphone.request();
+      if (!await Permission.microphone.isGranted) {
+        if (!mounted) return;
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Permission du microphone requise pour enregistrer'))
+        );
+        return;
+      }
+    }
+
+    if (!mounted) return;
+    
+    // Vérifier si les contrôleurs sont initialisés
+    if (!_isRecorderInitialized || !_isPlayerInitialized) {
+      await _initAudio();
+    }
+
+    // Afficher la boîte de dialogue d'enregistrement
+    final recordingResult = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        bool isRecording = false;
+        bool hasRecorded = false;
+        
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Enregistrement Audio'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    isRecording 
+                        ? 'Enregistrement en cours...' 
+                        : (hasRecorded ? 'Enregistrement terminé' : 'Prêt à enregistrer'),
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  if (isRecording || hasRecorded)
+                    AudioWaveforms(
+                      size: Size(MediaQuery.of(context).size.width * 0.7, 100),
+                      recorderController: _audioRecorder,
+                      waveStyle: const WaveStyle(
+                        waveColor: Colors.blue,
+                        extendWaveform: true,
+                        showMiddleLine: false,
+                      ),
+                      padding: const EdgeInsets.only(left: 18),
+                      margin: const EdgeInsets.symmetric(horizontal: 15),
+                    ),
+                  if (!isRecording && hasRecorded)
+                    IconButton(
+                      onPressed: () async {
+                        try {
+                          if (_audioPlayer.playerState == PlayerState.playing) {
+                            await _audioPlayer.pausePlayer();
+                          } else {
+                            await _audioPlayer.preparePlayer(
+                              path: _recordedPath,
+                              shouldExtractWaveform: true,
+                            );
+                            await _audioPlayer.startPlayer();
+                          }
+                          setDialogState(() {});
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Erreur de lecture: $e')),
+                          );
+                        }
+                      },
+                      icon: Icon(_audioPlayer.playerState == PlayerState.playing 
+                          ? Icons.pause : Icons.play_arrow),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop('cancel');
+                  },
+                  child: const Text('Annuler'),
+                ),
+                if (!isRecording && hasRecorded)
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop('confirm');
+                    },
+                    child: const Text('Confirmer'),
+                  ),
+                IconButton(
+                  icon: Icon(isRecording ? Icons.stop : Icons.mic),
+                  color: isRecording ? Colors.red : Colors.blue,
+                  onPressed: () async {
+                    try {
+                      if (isRecording) {
+                        final path = await _audioRecorder.stop();
+                        setDialogState(() {
+                          isRecording = false;
+                          hasRecorded = true;
+                        });
+
+                        // Initialiser le lecteur avec l'audio enregistré
+                        await _audioPlayer.preparePlayer(
+                          path: path!,
+                          shouldExtractWaveform: true,
+                        );
+
+                        setState(() {
+                          _recordedPath = path;
+                          _audioFileName = 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+                        });
+                      } else {
+                        await _audioRecorder.record(path: _recordedPath);
+                        setDialogState(() {
+                          isRecording = true;
+                        });
+                      }
+                    } catch (e) {
+                      print('Erreur lors de l\'enregistrement: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erreur d\'enregistrement: $e')),
+                      );
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (recordingResult == 'confirm') {
+      setState(() {
+        _selectedAudioPath = _recordedPath;
+      });
+      // Message de confirmation pour l'utilisateur
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enregistrement audio ajouté avec succès')),
+      );
+    }
+  }
+  
+  // Note: La méthode dispose() a été déplacée en haut de la classe
   
   // Méthode pour obtenir l'icône appropriée en fonction de l'ID du service
   IconData _getIconForService(String serviceId) {
@@ -287,7 +689,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         child: _isLoading
             ? const CircularProgressIndicator(color: Colors.white)
             : const Text(
-                'Soumettre l\'alerte',
+                'Envoyer l\'alerte',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
       ),

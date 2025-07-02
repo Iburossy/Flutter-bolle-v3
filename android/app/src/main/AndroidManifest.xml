@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Permissions pour les appels téléphoniques -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    
+    <!-- Permissions pour l'enregistrement audio -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <application
         android:label="Yollë"
         android:name="${applicationName}"
@@ -60,11 +65,9 @@
     </queries>
     <!-- Permissions pour l'accès aux médias -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     
     <!-- Permissions pour la géolocalisation -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

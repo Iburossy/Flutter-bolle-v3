@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:get_it/get_it.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/alert_history_model.dart';
 import '../../../../core/config/api_config.dart';
 import '../../../profile/domain/repositories/profile_repository.dart';
@@ -146,7 +147,7 @@ Future<AlertHistoryModel> addComment(String alertId, String comment) async {
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
-      'x-service-key': 'bolle-inter-service-secure-key-2025',  // Ajout de la clé API requise
+      'x-service-key': dotenv.env['SERVICE_API_KEY'] ?? 'bolle-inter-service-secure-key-2025',  // Utiliser la clé API depuis .env
     };
 
     // Préparer les données du commentaire pour hygiene-service
@@ -156,9 +157,8 @@ Future<AlertHistoryModel> addComment(String alertId, String comment) async {
       'citizenId': userId,
     };
     
-    // URL du service hygiene (port 3008)
-    // Note: Utiliser 10.0.2.2 pour l'émulateur Android, localhost pour les tests réels
-    final hygieneServiceUrl = 'http://10.0.2.2:3008'; 
+    // Utiliser l'URL du service hygiène depuis les variables d'environnement
+    final hygieneServiceUrl = dotenv.env['HYGIENE_SERVICE_URL'] ?? 'http://10.0.2.2:3008'; // Valeur par défaut si non définie
     final commentUrl = '$hygieneServiceUrl/api/external/alerts/$alertId/comments';
 
     // Faire la requête directement au hygiene-service
