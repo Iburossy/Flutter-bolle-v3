@@ -11,6 +11,7 @@ import '../../../home/presentation/screens/Services-tab-screen.dart';
 // import '../../../home/presentation/screens/Alerts-tab-screen.dart';
 import '../../../directory/presentation/screens/service_directory_screen.dart';
 import '../../../about/presentation/screens/about_screen.dart';
+import '../../../chatbot/presentation/screens/chatbot_screen.dart';
 import 'home-tab-screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -47,6 +48,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChatbotScreen(),
+            ),
+          );
+        },
+        backgroundColor: const Color.fromARGB(255, 53, 126, 120),
+        child: const Icon(Icons.chat, color: Colors.white),
+      ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -92,6 +105,19 @@ class _HomeScreenState extends State<HomeScreen> {
             const ListTile(
               leading: Icon(Icons.settings, color: Color.fromARGB(255, 53, 126, 120)),
               title: Text('Paramètres'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.chat, color: Color.fromARGB(255, 53, 126, 120)),
+              title: const Text('Assistant Yollë'),
+              onTap: () {
+                Navigator.pop(context); // Ferme le drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChatbotScreen(),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.info, color: Color.fromARGB(255, 53, 126, 120)),

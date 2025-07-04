@@ -1,0 +1,65 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - Salut
+    - Bonjour
+    - Hello
+    - Coucou
+    - Bonsoir
+    - salam
+
+- intent: thank_you
+  examples: |
+    - merci
+    - je te remercie
+    - c'est gentil
+    - merci beaucoup
+    - merci bien
+    - thanks
+
+
+- intent: nombre_alertes_du_jour
+  examples: |
+    - Combien d'alertes aujourd'hui ?
+    - Y a-t-il eu des alertes ce matin ?
+    - Nombre d'alertes aujourd'hui ?
+    - Est-ce qu'il y a eu des alertes ce jour ?
+    - Alerte aujourd’hui ?
+
+- intent: alertes_frequentes
+  examples: |
+    - Quelles sont les alertes les plus fréquentes à Dakar ?
+    - Quels types d'alertes reviennent souvent dans ma zone ?
+    - Alertes fréquentes à Thiès ?
+    - Alertes les plus signalées dans cette région
+    - Quels incidents sont fréquents ici ?
+    - Je suis à Pikine, quelles sont les alertes les plus fréquentes ici?
+
+- intent: zones_accidents                  
+  examples: |
+    - Y a-t-il des zones avec beaucoup d'accidents ?
+    - Quelles sont les zones les plus dangereuses ?
+    - Où y a-t-il beaucoup d'accidents de la route ?
+    - Zones avec beaucoup d'accidents ?
+    - Quels quartiers ont reçu le plus d'alertes pour accidents ?
+
+- intent: info_securite_et_eau
+  examples: |
+    - Est-ce qu’il y a des problèmes d’insécurité à Parcelles Assainies ?
+    - Y a-t-il de l’insécurité à Parcelles ?
+    - Est-ce un quartier dangereux ?
+    - Est-ce qu’on entend parler de vols à l’unité 12 ?
+    - Je veux savoir s’il y a des problèmes d’eau à Parcelles Assainies
+    - Coupures d’eau fréquentes à Parcelles ?
+    - Y a-t-il des alertes de sécurité à Parcelles Assainies ?
+    - Je pense aller vivre à Parcelles, est-ce qu’il y a des risques ?
+    - Et la sécurité à Parcelles, ça va ?
+    - Unité 12 c’est sécurisé ?
+    - Y a-t-il des problèmes d’agressions à Parcelles ?
+    - Problèmes d’eau ou de sécurité à Parcelles Assainies ?
+    - Je prévois de déménager au Parcelles Assainies y a t"il des risques de coupures d'eau ou d'insécurité? 
+
+
+
