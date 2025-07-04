@@ -315,6 +315,22 @@ class ChatbotService {
         ];
         break;
 
+      // --- Réponses dynamiques pour les services ---
+      case IntentClassifierService.INTENT_SERVICE_FOR_PROBLEM:
+        response = await _getServiceForProblemResponse(entities);
+        quickReplies = await getGeneralSuggestions();
+        break;
+
+      case IntentClassifierService.INTENT_SERVICE_COMPETENCE:
+        response = await _getServiceCompetenceResponse(entities);
+        quickReplies = _getServiceRelatedSuggestions(entities['service_name']);
+        break;
+
+      case IntentClassifierService.INTENT_SERVICE_HOURS:
+        response = await _getServiceHoursResponse(entities);
+        quickReplies = _getServiceRelatedSuggestions(entities['service_name']);
+        break;
+
       case IntentClassifierService.INTENT_UNKNOWN:
       default:
         // Recherche dans la base de FAQ si aucune intention précise n'est détectée
@@ -395,7 +411,13 @@ class ChatbotService {
   
   /// Obtenir une réponse concernant le statut d'une alerte
   Future<String> _getAlertStatusResponse(Map<String, dynamic> entities) async {
-    // Récupérer les statistiques des alertes de l'utilisateur
+    // Vérifier si une date a été extraite
+    if (entities.containsKey('date')) {
+      final date = entities['date'];
+      return await _dataService.getAlertStatusByDate(date);
+    }
+
+    // Si pas de date, utiliser la logique existante
     final alertStats = await _dataService.getUserAlertStats();
     
     // Si l'utilisateur n'a pas d'alertes
@@ -725,9 +747,42 @@ class ChatbotService {
         'Quels services sont disponibles ?',
       ];
     }
-    
+
     // Limiter à 4 suggestions pour l'affichage
     return suggestions.take(4).toList();
+  }
+
+
+
+  /// Obtenir une réponse sur les services pour un problème
+  Future<String> _getServiceForProblemResponse(Map<String, dynamic> entities) async {
+    if (entities.containsKey('alert_type')) {
+      final problemType = entities['alert_type'];
+      final service = await _dataService.getServiceForProblem(problemType);
+      if (service.startsWith('Je ne suis pas sûr')) {
+        return service;
+      }
+      return 'Pour un problème de type "$problemType", le service compétent est : $service.';
+    }
+    return 'De quel type de problème parlez-vous ? Je peux vous aider à trouver le bon service.';
+  }
+
+  /// Obtenir une réponse sur les compétences d'un service
+  Future<String> _getServiceCompetenceResponse(Map<String, dynamic> entities) async {
+    if (entities.containsKey('service_name')) {
+      final serviceName = entities['service_name'];
+      return await _dataService.getServiceCompetence(serviceName);
+    }
+    return 'De quel service souhaitez-vous connaître les compétences ? (ex: Police, Hygiène)';
+  }
+
+  /// Obtenir une réponse sur les horaires d'un service
+  Future<String> _getServiceHoursResponse(Map<String, dynamic> entities) async {
+    if (entities.containsKey('service_name')) {
+      final serviceName = entities['service_name'];
+      return await _dataService.getServiceHours(serviceName);
+    }
+    return 'De quel service souhaitez-vous connaître les horaires ?';
   }
 
   /// Générer un message de bienvenue initial
@@ -748,7 +803,7 @@ class ChatbotService {
     }
     
     String welcomeMessage;
-    if (_context.userName != null) {
+    if (_context.userName != null && _context.useUserName) {
       welcomeMessage = '$greeting ${_context.userName} ! Je suis le chatbot de l\'application Yollë, comment puis-je vous aider aujourd\'hui ?';
     } else {
       welcomeMessage = '$greeting ! Je suis le chatbot de l\'application Yollë, comment puis-je vous aider aujourd\'hui ?';

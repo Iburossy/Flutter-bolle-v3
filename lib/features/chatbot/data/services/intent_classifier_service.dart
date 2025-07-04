@@ -37,6 +37,11 @@ class IntentClassifierService {
   static const String INTENT_ZONES_ACCIDENTS = 'zones_accidents';
   static const String INTENT_INFO_SECURITE_EAU = 'info_securite_et_eau';
 
+  // Intentions pour les questions sur les services
+  static const String INTENT_SERVICE_FOR_PROBLEM = 'service_for_problem';
+  static const String INTENT_SERVICE_COMPETENCE = 'service_competence';
+  static const String INTENT_SERVICE_HOURS = 'service_hours';
+
   /// Modèles d'expressions pour chaque intention
   final Map<String, List<String>> _intentPatterns = {
     INTENT_GREETING: [
@@ -62,7 +67,7 @@ class IntentClassifierService {
       'mon alerte est-elle traitée', 'alerte résolue', 'qui traite mon alerte',
       'suivi alerte', 'temps de traitement', 'délai traitement',
       'statut', 'attente depuis', 'pourquoi mon alerte',
-      'savoir si alerte résolue', 'temps pour traiter',
+      'savoir si alerte résolue', 'temps pour traiter', 'envoyée le',
     ],
     INTENT_ALERT_CREATION: [
       'créer une alerte', 'lancer une alerte', 'signaler un problème',
@@ -130,6 +135,18 @@ class IntentClassifierService {
       'sécurité', 'agressions', 'parcelles assainies', 'unité 12', 'coupures',
       'déménager', 'vivre à', 'sécurisé', 'eau potable', 'approvisionnement en eau',
     ],
+
+    INTENT_SERVICE_FOR_PROBLEM: [
+      'en cas de', 'à quel service s\'adresser', 'qui gère les alertes de type',
+      'quel service gère', 'à qui signaler',
+    ],
+    INTENT_SERVICE_COMPETENCE: [
+      'quelles sont les compétences de', 'quels types de problèmes sont traités par',
+      'que fait le service',
+    ],
+    INTENT_SERVICE_HOURS: [
+      'quelles sont les heures d\'ouverture de', 'horaires de',
+    ],
   };
 
   /// Classifier l'intention d'un message utilisateur et extraire les entités
@@ -175,6 +192,7 @@ class IntentClassifierService {
         break;
       case INTENT_ALERT_STATUS:
         _extractAlertReference(lowerMessage, entities);
+        _extractDate(lowerMessage, entities); // Ajout de l'extraction de date
         break;
       case INTENT_ALERT_INFO:
         _extractAlertType(lowerMessage, entities);
@@ -188,6 +206,15 @@ class IntentClassifierService {
       case INTENT_INFO_SECURITE_EAU:
         _extractLocation(lowerMessage, entities);
         break;
+
+      // Extraire les entités pour les questions sur les services
+      case INTENT_SERVICE_FOR_PROBLEM:
+        _extractAlertType(lowerMessage, entities); // Réutilise l'extracteur de type d'alerte pour trouver le problème
+        break;
+      case INTENT_SERVICE_COMPETENCE:
+      case INTENT_SERVICE_HOURS:
+        _extractServiceName(lowerMessage, entities);
+        break;
     }
     
     return entities;
@@ -195,11 +222,11 @@ class IntentClassifierService {
   
   /// Extraire le nom d'un service mentionné
   void _extractServiceName(String message, Map<String, dynamic> entities) {
-    final List<String> services = [
+    // Recherche de noms de services connus
+    final services = [
       'hygiène', 'hygiene', 'police', 'gendarmerie', 'douane', 'urbanisme',
       'voirie', 'environnement', 'eau', 'électricité', 'electricite', 'sécurité', 'securite',
     ];
-    
     for (final service in services) {
       if (message.contains(service)) {
         entities['service_name'] = service;
@@ -207,7 +234,16 @@ class IntentClassifierService {
       }
     }
   }
-  
+
+  void _extractDate(String message, Map<String, dynamic> entities) {
+    // Regex pour trouver une date au format JJ/MM/AAAA ou JJ-MM-AAAA
+    final dateRegex = RegExp(r'(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})');
+    final match = dateRegex.firstMatch(message);
+    if (match != null) {
+      entities['date'] = match.group(1);
+    }
+  }
+
   /// Extraire une référence à une alerte
   void _extractAlertReference(String message, Map<String, dynamic> entities) {
     // Recherche de patterns comme "alerte du [date]" ou "alerte numéro [id]"

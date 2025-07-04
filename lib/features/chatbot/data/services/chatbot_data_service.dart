@@ -145,6 +145,55 @@ class ChatbotDataService {
     }
     return "Je n'ai pas d'informations spécifiques sur la sécurité ou l'eau pour $location.";
   }
+
+  // --- Nouvelles méthodes pour les réponses dynamiques ---
+
+  /// Trouver le service compétent pour un type de problème
+  Future<String> getServiceForProblem(String problemType) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final problem = problemType.toLowerCase();
+    if (problem.contains('vol') || problem.contains('agression')) {
+      return 'Police';
+    } else if (problem.contains('déchet') || problem.contains('insalubrité')) {
+      return 'Service d\'hygiène';
+    } else if (problem.contains('incendie')) {
+      return 'Sapeurs-pompiers';
+    }
+    return 'Je ne suis pas sûr, mais vous pouvez contacter le service d\'assistance générale.';
+  }
+
+  /// Récupérer les compétences d'un service
+  Future<String> getServiceCompetence(String serviceName) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final service = serviceName.toLowerCase();
+    if (service.contains('police')) {
+      return 'La Police gère la sécurité publique, les vols, les agressions et la circulation.';
+    } else if (service.contains('hygiène')) {
+      return 'Le service d\'hygiène s\'occupe de la propreté, de la gestion des déchets et de la salubrité publique.';
+    } else if (service.contains('gendarmerie')) {
+      return 'La Gendarmerie assure la sécurité dans les zones rurales et périurbaines.';
+    }
+    return 'Je n\'ai pas d\'informations sur les compétences de ce service.';
+  }
+
+  /// Récupérer les horaires d'un service
+  Future<String> getServiceHours(String serviceName) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final service = serviceName.toLowerCase();
+    if (service.contains('police') || service.contains('gendarmerie')) {
+      return 'Les services de police et de gendarmerie sont disponibles 24h/24 et 7j/7.';
+    } else if (service.contains('hygiène')) {
+      return 'Le service d\'hygiène est généralement ouvert de 8h à 17h, du lundi au vendredi.';
+    }
+    return 'Je ne connais pas les horaires de ce service.';
+  }
+
+  /// Récupérer le statut d'une alerte par sa date
+  Future<String> getAlertStatusByDate(String date) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    // Simule une recherche d'alerte
+    return 'L\'alerte que vous avez mentionnée pour le $date est actuellement en cours de traitement par nos équipes.';
+  }
   
   /// Récupérer les informations d'un service spécifique
   Future<ServiceModel?> getServiceDetails(String serviceId) async {
