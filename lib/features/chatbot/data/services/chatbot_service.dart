@@ -187,27 +187,7 @@ class ChatbotService {
       'Consultez notre politique de confidentialité complète dans Paramètres > Confidentialité.',
   };
 
-  /// Liste des suggestions de questions fréquentes
-  final List<String> _suggestions = [
-    'Quels types de problèmes puis-je signaler ?',
-    'Quel est le statut de mon alerte ?',
-    'Qui va traiter mon alerte ?',
-    'Quels services sont disponibles ?',
-    'Comment fonctionne la géolocalisation ?',
-    'Suis-je anonyme quand je lance une alerte ?',
-    'Combien de temps pour traiter une alerte ?',
-    'Comment contacter le support technique ?',
-    // Nouvelles suggestions pour les nouvelles intentions
-    'Combien d\'alertes y a-t-il aujourd\'hui ?',
-    'Quelles sont les alertes fréquentes à Dakar ?',
-    'Y a-t-il des zones avec beaucoup d\'accidents ?',
-    'Est-ce qu\'il y a des problèmes d\'insécurité à Parcelles Assainies ?',
-  ];
 
-  /// Obtenir la liste des suggestions de questions
-  List<String> getSuggestions() {
-    return _suggestions;
-  }
 
   /// Traiter une question de l'utilisateur et générer une réponse
   Future<ChatMessage> processUserMessage(String message) async {
@@ -220,7 +200,7 @@ class ChatbotService {
     final Map<String, dynamic> entities = analysis.entities;
     
     String response = '';
-    late List<String> quickReplies;
+    List<String> quickReplies = [];
     
     // Générer une réponse basée sur l'intention et les entités
     // Traiter l'intention selon son type
@@ -716,29 +696,38 @@ class ChatbotService {
     // S'assurer que le service est initialisé
     await initialize();
     
-    List<String> suggestions = [
-      'Quels types de problèmes puis-je signaler ?',
-      'Comment fonctionne l\'application ?',
-      'Comment créer une alerte ?',
-    ];
+    final List<String> suggestions = [];
     
     // Ajouter des suggestions basées sur le contexte utilisateur
     try {
       final alertStats = await _dataService.getUserAlertStats();
-      if (alertStats['total'] > 0) {
-        if (alertStats['inProgress'] > 0) {
-          suggestions.add('Statut de mes alertes en cours');
-        } else if (alertStats['pending'] > 0) {
-          suggestions.add('Pourquoi mon alerte est en attente ?');
-        } else {
-          suggestions.add('Voir mon historique d\'alertes');
-        }
+      
+      // Suggestions générales toujours présentes
+      suggestions.add('Quels types de problèmes puis-je signaler ?');
+      
+      // Suggestions sur les nouvelles fonctionnalités
+      suggestions.add('Quelles sont les alertes du jour ?');
+      suggestions.add('Où sont les zones à risque ?');
+
+      // Suggestion contextuelle sur les alertes
+      if (alertStats['total'] > 0 && (alertStats['pending'] > 0 || alertStats['inProgress'] > 0)) {
+        suggestions.add('Quel est le statut de mes alertes ?');
+      } else {
+        suggestions.add('Comment créer une nouvelle alerte ?');
       }
+
     } catch (e) {
-      // En cas d'erreur, utilise les suggestions par défaut
+      // En cas d'erreur, utilise des suggestions de base
+      return [
+        'Quels types de problèmes puis-je signaler ?',
+        'Comment fonctionne l\'application ?',
+        'Comment créer une alerte ?',
+        'Quels services sont disponibles ?',
+      ];
     }
     
-    return suggestions;
+    // Limiter à 4 suggestions pour l'affichage
+    return suggestions.take(4).toList();
   }
 
   /// Générer un message de bienvenue initial

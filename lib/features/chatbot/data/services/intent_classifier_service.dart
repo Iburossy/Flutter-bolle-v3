@@ -107,6 +107,7 @@ class IntentClassifierService {
       'guide', 'tutorial', 'mode d\'emploi',
     ],
     INTENT_ALERTES_DU_JOUR: [
+      'quelles sont les alertes du jour',
       'combien d\'alertes aujourd\'hui', 'alertes ce matin', 'nombre d\'alertes aujourd\'hui',
       'alertes ce jour', 'alerte aujourd\'hui', 'signalements aujourd\'hui',
       'incidents du jour', 'alertes récentes', 'nouvelles alertes',
@@ -118,6 +119,7 @@ class IntentClassifierService {
       'alertes dans ma région', 'alertes à dakar', 'alertes à thiès', 'alertes à pikine',
     ],
     INTENT_ZONES_ACCIDENTS: [
+      'où sont les zones à risque',
       'zones avec beaucoup d\'accidents', 'zones dangereuses', 'accidents de la route',
       'quartiers accidents', 'lieux dangereux', 'points noirs', 'endroits à risque',
       'zones à éviter', 'cartes des accidents', 'zones d\'accidents',
@@ -133,20 +135,24 @@ class IntentClassifierService {
   /// Classifier l'intention d'un message utilisateur et extraire les entités
   IntentAnalysisResult classifyIntent(String message) {
     final lowerMessage = message.toLowerCase();
-    String intent = INTENT_UNKNOWN;
-    
+    String bestIntent = INTENT_UNKNOWN;
+    int maxScore = 0;
+
     _intentPatterns.forEach((intentKey, patterns) {
-      int score = 0;
+      int currentScore = 0;
       for (final pattern in patterns) {
         if (lowerMessage.contains(pattern)) {
           // Augmente le score si le pattern est trouvé
-          score += pattern.split(' ').length; // Donne plus de poids aux expressions plus longues
+          currentScore += pattern.split(' ').length; // Donne plus de poids aux expressions plus longues
         }
       }
-      if (score > 0) {
-        intent = intentKey;
+      if (currentScore > maxScore) {
+        maxScore = currentScore;
+        bestIntent = intentKey;
       }
     });
+
+    final String intent = bestIntent;
     
     // Extraire les entités selon l'intention
     final Map<String, dynamic> entities = _extractEntities(message, intent);
@@ -174,6 +180,12 @@ class IntentClassifierService {
         _extractAlertType(lowerMessage, entities);
         break;
       case INTENT_LOCATION:
+        _extractLocation(lowerMessage, entities);
+        break;
+
+      // Extraire la localisation pour les nouvelles intentions
+      case INTENT_ALERTES_FREQUENTES:
+      case INTENT_INFO_SECURITE_EAU:
         _extractLocation(lowerMessage, entities);
         break;
     }
