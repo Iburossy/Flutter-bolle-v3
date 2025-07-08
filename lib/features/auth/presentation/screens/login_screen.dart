@@ -309,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   text: 'Se connecter',
                   onPressed: _loginUser,
                   isLoading: _isLoading,
-                  backgroundColor: const Color.fromARGB(255, 53, 126, 120), // Bleu foncé
+                  backgroundColor: const Color.fromARGB(255, 53, 126, 120), // vert sarcelle
                 ),
                 SizedBox(height: screenHeight * 0.03),
                 Center(

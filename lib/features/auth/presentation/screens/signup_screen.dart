@@ -331,7 +331,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         TextSpan(
                           text: 'Se connecter',
                           style: const TextStyle(
-                            color: Color(0xFF003A70), // Bleu foncé
+                            color: Color.fromARGB(255, 53, 126, 120), // vert sarcelle
                             fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
                           ),

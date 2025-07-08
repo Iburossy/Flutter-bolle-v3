@@ -4,21 +4,21 @@ import 'package:equatable/equatable.dart';
 class CreateAlertRequestModel extends Equatable {
   final String serviceId;
   final String category;
-  final String description;
+    final String? description;
   final List<double> coordinates; // [longitude, latitude]
   final String address;
   final bool isAnonymous;
   final List<Map<String, dynamic>>? proofs; // Optionnel car sera traité séparément
 
   /// Create a request to create an alert
-  const CreateAlertRequestModel({
+  CreateAlertRequestModel({
     required this.serviceId,
     required this.category,
-    required this.description,
+    this.description = '',
     required this.coordinates,
     required this.address,
     required this.isAnonymous,
-    this.proofs, required String priority, required String title,
+    this.proofs,
   });
 
   /// Converts this CreateAlertRequestModel to a JSON map
@@ -55,11 +55,11 @@ class CreateAlertRequestModel extends Equatable {
     return CreateAlertRequestModel(
       serviceId: serviceId ?? this.serviceId,
       category: category ?? this.category,
-      description: description ?? this.description,
+            description: description ?? this.description,
       coordinates: coordinates ?? this.coordinates,
       address: address ?? this.address,
       isAnonymous: isAnonymous ?? this.isAnonymous,
-      proofs: proofs ?? this.proofs, priority: '', title: '',
+            proofs: proofs ?? this.proofs,
     );
   }
 

@@ -629,14 +629,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         ),
         contentPadding: const EdgeInsets.all(16),
       ),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Veuillez entrer une description';
-        } else if (value.length < 10) {
-          return 'La description doit contenir au moins 10 caractères';
-        }
-        return null;
-      },
+
     );
   }
   
@@ -839,7 +832,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         coordinates: _currentCoordinates,
         address: _currentAddress,
         isAnonymous: _isAnonymous,
-        proofs: _processProofs(), priority: '', title: '',
+        proofs: _processProofs(),
       );
 
       print('DEBUG - Alert request created: ${alertRequest.toJson()}');

@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 import '../../data/models/available_service_model.dart';
 import '../../../../features/alerts/data/models/create_alert_request_model.dart';
@@ -35,6 +37,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   List<String> _selectedImagePaths = [];
   String? _selectedVideoPath;
   String? _selectedAudioPath;
+  List<double>? _currentCoordinates;
+  String _currentAddress = '';
   
   @override
   void dispose() {
@@ -118,14 +122,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         ),
         contentPadding: const EdgeInsets.all(16),
       ),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Veuillez entrer une description';
-        } else if (value.length < 10) {
-          return 'La description doit contenir au moins 10 caractères';
-        }
-        return null;
-      },
+
     );
   }
   
@@ -185,16 +182,59 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
   
+  // Traitement des preuves pour la requête
+  List<Map<String, dynamic>>? _processProofs() {
+    final List<Map<String, dynamic>> proofs = [];
+    
+    // Ajouter les images si présentes
+    if (_selectedImagePaths.isNotEmpty) {
+      proofs.addAll(_selectedImagePaths.map((path) => {
+        'type': 'image',
+        'url': path,
+        'size': File(path).lengthSync(),
+      }));
+    }
+    
+    // Ajouter la vidéo si présente
+    if (_selectedVideoPath != null) {
+      proofs.add({
+        'type': 'video',
+        'url': _selectedVideoPath,
+        'size': File(_selectedVideoPath!).lengthSync(),
+      });
+    }
+    
+    // Ajouter l'audio si présent
+    if (_selectedAudioPath != null) {
+      proofs.add({
+        'type': 'audio',
+        'url': _selectedAudioPath,
+        'size': File(_selectedAudioPath!).lengthSync(),
+      });
+    }
+    
+    return proofs.isNotEmpty ? proofs : null;
+  }
+
   // Soumission de l'alerte
   void _submitAlert(BuildContext context) {
     if (_formKey.currentState?.validate() ?? false) {
+      // Vérifier si la localisation a été faite
+      if (_currentCoordinates == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Veuillez récupérer votre position avant de soumettre')),
+        );
+        return;
+      }
       // Créer l'objet de requête d'alerte
       final alertRequest = CreateAlertRequestModel(
-        category: _selectedCategory!,
-        title: 'Alerte ${widget.service.name}', // Générer un titre automatiquement
+        serviceId: widget.service.id,
+        category: _selectedCategory!.toLowerCase(),
         description: _descriptionController.text,
+        coordinates: _currentCoordinates!,
+        address: _currentAddress,
         isAnonymous: _isAnonymous,
-        priority: 'medium', serviceId: '', coordinates: [], address: '', // Valeur par défaut pour la priorité
+        proofs: _processProofs(),
       );
 
       // Utiliser le BLoC pour envoyer l'alerte avec les fichiers sélectionnés
@@ -357,35 +397,127 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
   
+  // Récupération de la position actuelle sans carte
+  Future<void> _getLocation() async {
+    try {
+      // Vérifier les permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Permission de localisation refusée')),
+          );
+          return;
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Les permissions de localisation sont refusées de façon permanente, nous ne pouvons pas demander les permissions.'),
+          ),
+        );
+        return;
+      }
+      
+      // Afficher un indicateur de chargement
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Récupération de votre position...')),
+      );
+      
+      // Obtenir la position
+      final Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      
+      // Géocodage inverse pour obtenir l'adresse
+      String address = "Adresse inconnue";
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        
+        if (placemarks.isNotEmpty) {
+          Placemark place = placemarks[0];
+          address = '${place.street ?? ''}, ${place.locality ?? ''}, ${place.postalCode ?? ''}, ${place.country ?? ''}';
+        }
+      } catch (e) {
+        print('Erreur de géocodage: $e');
+      }
+      
+      // Mettre à jour les coordonnées et l'adresse
+      setState(() {
+        _currentCoordinates = [position.longitude, position.latitude];
+        _currentAddress = address;
+      });
+      
+      // Afficher un message de succès
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Position récupérée avec succès')),
+      );
+      
+    } catch (e) {
+      // Gérer les erreurs
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur de localisation: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      
+      // Définir des coordonnées par défaut pour Dakar
+      setState(() {
+        _currentCoordinates = [-17.4440, 14.6937]; // Dakar, Sénégal
+        _currentAddress = "Dakar, Sénégal";
+      });
+    }
+  }
+
   // Carte de localisation
   Widget _buildLocationCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.location_on, color: Colors.red, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Utilisation automatique',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  'de la géolocalisation',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
+    return InkWell(
+      onTap: _getLocation,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.location_on, color: Colors.red, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Utilisation automatique',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                  const Text(
+                    'de la géolocalisation',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _currentAddress.isNotEmpty ? _currentAddress : 'Appuyez pour localiser',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Icon(Icons.refresh, color: Colors.blue[700]),
+          ],
+        ),
       ),
     );
   }
